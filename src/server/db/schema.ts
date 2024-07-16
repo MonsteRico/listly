@@ -1,12 +1,14 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   index,
+  integer,
   pgTableCreator,
   serial,
   timestamp,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -18,17 +20,37 @@ import {
  */
 export const createTable = pgTableCreator((name) => `listly_${name}`);
 
-export const posts = createTable(
-  "post",
-  {
-    id: serial("id").primaryKey(),
-    name: varchar("name", { length: 256 }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt", { withTimezone: true }),
-  },
-  (example) => ({
-    nameIndex: index("name_idx").on(example.name),
-  })
-);
+export const listBoards = createTable("list_boards", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 256 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }),
+});
+
+export const lists = createTable("lists", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  boardId: uuid("board_id"),
+  name: varchar("name", { length: 256 }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }),
+});
+
+export const listsRelations = relations(lists, ({ one }) => ({
+  listBoards: one(listBoards, {
+    fields: [lists.boardId],
+    references: [listBoards.id],
+  }),
+}));
+
+export const listBoardsRelations = relations(listBoards, ({ many }) => ({
+  lists: many(lists),
+}));
+
+export type CreateList = { name: string; boardId: string };
+export type CreateListBoard = { name: string };
+export type List = typeof lists.$inferSelect;
+export type ListBoard = typeof listBoards.$inferSelect & { lists: List[] };
