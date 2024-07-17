@@ -3,6 +3,7 @@
 [x] Item component
 [x] Adding items to lists, removing, updating etc
 [x] Drag and drop between lists
+[ ] FIX BUILD ERROR b/c localStorage is not defined
 [ ] Drag and drop lists within a board
 [ ] List settings for renaming and setting default type
 [ ] User settings for dark/light mode and setting their nickname
