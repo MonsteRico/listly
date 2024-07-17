@@ -27,7 +27,24 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-export function Board({ listBoard }: { listBoard: ListBoard }) {
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+
+export function Boards({ listBoards }: { listBoards: ListBoard[] }) {
+  const [parent, enableAnimations] = useAutoAnimate();
+
+  return (
+    <main ref={parent} className="flex flex-wrap gap-4">
+      <CreateListBoard />
+
+      {listBoards.map((listBoard) => (
+        <Board key={listBoard.id} listBoard={listBoard} />
+      ))}
+    </main>
+  );
+}
+
+
+function Board({ listBoard }: { listBoard: ListBoard }) {
   const router = useRouter();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const previousListBoardIds = LocalStorage.getItem("listly_listBoardIds", []);

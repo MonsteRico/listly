@@ -1,3 +1,4 @@
+import { TopNav } from "@/components/TopNav";
 import { Toaster } from "@/components/ui/sonner";
 import "@/styles/globals.css";
 
@@ -21,7 +22,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-sans ${inter.variable}`}>{children}
+      <body className={`font-sans ${inter.variable} bg-slate-300 m-5`}>
+        <TopNav />
+        {children}
         <Toaster position="top-center" />
       </body>
     </html>
