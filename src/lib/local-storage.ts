@@ -1,3 +1,4 @@
+"use client";
 import { useLocalStorage } from "usehooks-ts";
 
 type LocalStorageKeys = "listly_listBoardIds";
