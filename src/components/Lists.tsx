@@ -37,6 +37,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import { moveItems } from "@/server/actions/moveItems";
 import { deleteListItem } from "@/server/actions/deleteListItem";
+import { cn } from "@/lib/utils";
 
 const ListsContext = createContext<{
   lists: List[];
@@ -148,16 +149,16 @@ function List({ list }: { list: List }) {
   const [items, setItems] = useState(list.items || []);
 
   return (
-    <Card className="max-h-[80dvh] min-w-64 overflow-y-auto">
+    <Card className="max-h-[80dvh] min-w-64 max-w-xl overflow-y-auto">
       <CardHeader className="flex flex-row items-center justify-between">
         <h2>{list.name}</h2>
         <DeleteListButton list={list} />
       </CardHeader>
       <Droppable droppableId={list.id} type="list">
-        {(provided) => {
+        {(provided, snapshot) => {
           return (
             <div
-              className="flex flex-col gap-2"
+              className={cn("flex flex-col gap-2 py-2 transition duration-150", snapshot.isDraggingOver && "bg-muted")}
               ref={parent}
               {...provided.droppableProps}
             >
@@ -201,7 +202,7 @@ function AddListItem({
   const formRef = useRef<HTMLFormElement>(null);
   return (
     <form
-      className="relative"
+      className="flex flex-row border-2 border-dashed rounded-lg focus-within:border-solid"
       ref={formRef}
       action={async (formData) => {
         const { content } = Object.fromEntries(formData.entries()) as {
@@ -217,11 +218,11 @@ function AddListItem({
         formRef.current?.reset();
       }}
     >
-      <Input type="text" name="content" placeholder="New Item" />
+      <input type="text" className="px-4 focus:outline-none" name="content" placeholder="New Item" />
       <Button
         type="submit"
         variant="ghost"
-        className="absolute right-0 top-0 text-muted-foreground"
+        className="text-muted-foreground"
       >
         <Plus />
       </Button>

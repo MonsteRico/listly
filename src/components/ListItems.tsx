@@ -3,70 +3,119 @@ import { Card, CardContent } from "./ui/card";
 import { Draggable } from "@hello-pangea/dnd";
 import { Button } from "./ui/button";
 import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function ListItem({ item, index, onDelete }: { item: Item; index: number; onDelete: () => void }) {
+export function ListItem({
+  item,
+  index,
+  onDelete,
+}: {
+  item: Item;
+  index: number;
+  onDelete: () => void;
+}) {
   return (
     <Draggable draggableId={item.id} index={index}>
-      {(provided) => (
-        <div
-          className="relative mb-2"
+      {(provided, snapshot) => (
+        <Card
+          className={cn(
+            "mb-2 flex h-full w-full items-center bg-muted",
+            snapshot.isDragging && "bg-accent",
+          )}
           ref={provided.innerRef}
           {...provided.draggableProps}
-          {...provided.dragHandleProps}
         >
-          <ListItemContent item={item} />
-          <Button variant="ghost" className="absolute right-0 top-0 text-muted-foreground" onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            onDelete();
-          }}>
-            <X className="h-4" />
-          </Button>
-        </div>
+            <div {...provided.dragHandleProps} className="h-full w-3/4 pl-4 py-2">
+              <ListItemContent isDragging={snapshot.isDragging} item={item} />
+            </div>
+            <Button
+              variant="ghost"
+              className="w-1/4 h-full text-muted-foreground hover:bg-muted-foreground/10"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onDelete();
+              }}
+            >
+              <X />
+            </Button>
+        </Card>
       )}
     </Draggable>
   );
 }
 
-function ListItemContent({ item }: { item: Item }) {
+function ListItemContent({
+  item,
+  isDragging,
+}: {
+  item: Item;
+  isDragging: boolean;
+}) {
   switch (item.type) {
     case "thing":
-      return <ListItemThing item={item} />;
+      return <ListItemThing isDragging={isDragging} item={item} />;
     case "movie":
-      return <ListItemMovie item={item} />;
+      return <ListItemMovie isDragging={isDragging} item={item} />;
     case "game":
-      return <ListItemGame item={item} />;
+      return <ListItemGame isDragging={isDragging} item={item} />;
     case "book":
-      return <ListItemBook item={item} />;
+      return <ListItemBook isDragging={isDragging} item={item} />;
     case "tv_show":
-      return <ListItemTVShow item={item} />;
+      return <ListItemTVShow isDragging={isDragging} item={item} />;
     default:
       return <div className="bg-red-500">{item.content}</div>;
   }
 }
 
-function ListItemThing({ item }: { item: Item }) {
+function ListItemThing({
+  item,
+  isDragging,
+}: {
+  item: Item;
+  isDragging: boolean;
+}) {
   return (
-    <Card className="flex items-center bg-muted">
-      <CardContent className="flex items-center text-sm">
-        {item.content}
-      </CardContent>
-    </Card>
+    <p className="text-sm">{item.content}</p>
   );
 }
 
-function ListItemMovie({ item }: { item: Item }) {
+function ListItemMovie({
+  item,
+  isDragging,
+}: {
+  item: Item;
+  isDragging: boolean;
+}) {
+  return <p>{item.content}</p>;
+}
+
+function ListItemGame({
+  item,
+  isDragging,
+}: {
+  item: Item;
+  isDragging: boolean;
+}) {
   return <div>{item.content}</div>;
 }
 
-function ListItemGame({ item }: { item: Item }) {
+function ListItemBook({
+  item,
+  isDragging,
+}: {
+  item: Item;
+  isDragging: boolean;
+}) {
   return <div>{item.content}</div>;
 }
 
-function ListItemBook({ item }: { item: Item }) {
-  return <div>{item.content}</div>;
-}
-
-function ListItemTVShow({ item }: { item: Item }) {
-  return <div>{item.content}</div>;
+function ListItemTVShow({
+  item,
+  isDragging,
+}: {
+  item: Item;
+  isDragging: boolean;
+}) {
+  return <p>{item.content}</p>;
 }
