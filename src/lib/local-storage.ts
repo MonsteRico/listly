@@ -13,9 +13,12 @@ export class LocalStorage {
    * @returns
    */
   static getItem<T>(key: LocalStorageKeys, defaultValue?: T): T {
-    const item = localStorage.getItem(key);
-    if (item) return JSON.parse(item) as T;
-    return defaultValue as T;
+    if (typeof window !== undefined) {
+      const item = localStorage.getItem(key);
+      if (item) return JSON.parse(item) as T;
+      return defaultValue as T;
+    }
+    else return defaultValue as T;
   }
 
   /**
@@ -25,7 +28,9 @@ export class LocalStorage {
    * @returns `[value, setValueFn]`
    */
   static useItem<T>(key: LocalStorageKeys, defaultValue: T) {
-    return useLocalStorage(key, defaultValue);
+    if (typeof window !== undefined) {
+      return useLocalStorage(key, defaultValue);
+    }
   }
 
   /**
@@ -38,6 +43,8 @@ export class LocalStorage {
    * @param value The value to set the key entry to
    */
   static setItem<T>(key: LocalStorageKeys, value: T) {
-    localStorage.setItem(key, JSON.stringify(value));
+    if (typeof window !== undefined) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
   }
 }
