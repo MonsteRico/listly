@@ -1,3 +1,4 @@
+import { Providers } from "@/components/Providers";
 import { TopNav } from "@/components/TopNav";
 import { Toaster } from "@/components/ui/sonner";
 import "@/styles/globals.css";
@@ -22,10 +23,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-sans ${inter.variable} bg-slate-300 m-5`}>
-        <TopNav />
-        {children}
-        <Toaster position="top-center" />
+      <body className={`font-sans ${inter.variable} m-5 bg-slate-300`}>
+        <Providers>
+          <TopNav />
+          {children}
+          <Toaster position="top-center" />
+        </Providers>
       </body>
     </html>
   );

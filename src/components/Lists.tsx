@@ -31,7 +31,6 @@ import { toast } from "sonner";
 import { Input } from "./ui/input";
 import { addListItem } from "@/server/actions/addListItem";
 import { ListItem } from "./ListItems";
-import { LocalStorageAdder } from "./LocalStorageAdder";
 import { CreateList } from "./CreateList";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
@@ -129,7 +128,6 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
           ref={parent}
           className="flex flex-wrap justify-center gap-4 overflow-x-auto"
         >
-          <LocalStorageAdder boardId={listBoard.id} />
           {lists.map((list) => (
             <List key={list.id} list={list} />
           ))}
@@ -158,7 +156,10 @@ function List({ list }: { list: List }) {
         {(provided, snapshot) => {
           return (
             <div
-              className={cn("flex flex-col gap-2 py-2 transition duration-150", snapshot.isDraggingOver && "bg-muted")}
+              className={cn(
+                "flex flex-col gap-2 py-2 transition duration-150",
+                snapshot.isDraggingOver && "bg-muted",
+              )}
               ref={parent}
               {...provided.droppableProps}
             >
@@ -202,7 +203,7 @@ function AddListItem({
   const formRef = useRef<HTMLFormElement>(null);
   return (
     <form
-      className="flex flex-row border-2 border-dashed rounded-lg focus-within:border-solid"
+      className="flex flex-row rounded-lg border-2 border-dashed focus-within:border-solid"
       ref={formRef}
       action={async (formData) => {
         const { content } = Object.fromEntries(formData.entries()) as {
@@ -218,12 +219,13 @@ function AddListItem({
         formRef.current?.reset();
       }}
     >
-      <input type="text" className="px-4 focus:outline-none" name="content" placeholder="New Item" />
-      <Button
-        type="submit"
-        variant="ghost"
-        className="text-muted-foreground"
-      >
+      <input
+        type="text"
+        className="px-4 focus:outline-none"
+        name="content"
+        placeholder="New Item"
+      />
+      <Button type="submit" variant="ghost" className="text-muted-foreground">
         <Plus />
       </Button>
     </form>

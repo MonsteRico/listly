@@ -10,7 +10,6 @@ import { LocalStorage } from "@/lib/local-storage";
 
 export function CreateListBoard() {
   const formRef = useRef<HTMLFormElement>(null);
-  const previousListBoardIds = LocalStorage.getItem("listly_listBoardIds", []);
   return (
     <Card className="flex flex-col justify-center items-center">
       <CardContent className="flex flex-col justify-center items-center">
@@ -28,7 +27,6 @@ export function CreateListBoard() {
             const listBoard = await createListBoard({ name: name.trim() });
             toast.success("List Board created");
             
-            LocalStorage.setItem("listly_listBoardIds", [...previousListBoardIds, listBoard.id]);
             // clear form
             formRef.current?.reset();
           }}
