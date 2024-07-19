@@ -1,5 +1,4 @@
 "use client";
-import { CreateListBoard } from "@/components/CreateListBoard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,17 +17,11 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { LocalStorage } from "@/lib/local-storage";
 import { deleteList } from "@/server/actions/deleteList";
-import { deleteListBoard } from "@/server/actions/deleteListBoard";
-import { getListBoards } from "@/server/actions/getListBoards";
 import type { List, ListBoard, Item } from "@/server/db/schema";
-import { Plus, Share, Trash } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Plus, Trash } from "lucide-react";
 import { createContext, useContext, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Input } from "./ui/input";
 import { addListItem } from "@/server/actions/addListItem";
 import { ListItem } from "./ListItems";
 import { CreateList } from "./CreateList";

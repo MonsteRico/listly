@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
-import { LocalStorage } from "@/lib/local-storage";
 
 export function CreateListBoard() {
   const formRef = useRef<HTMLFormElement>(null);

@@ -14,16 +14,12 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { LocalStorage } from "@/lib/local-storage";
 import { deleteListBoard } from "@/server/actions/deleteListBoard";
-import { getListBoards } from "@/server/actions/getListBoards";
 import { ListBoard } from "@/server/db/schema";
 import { Share, Trash } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";

@@ -1,5 +1,5 @@
 import type { Item } from "@/server/db/schema";
-import { Card, CardContent } from "./ui/card";
+import { Card } from "./ui/card";
 import { Draggable } from "@hello-pangea/dnd";
 import { Button } from "./ui/button";
 import { X } from "lucide-react";

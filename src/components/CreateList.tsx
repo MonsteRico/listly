@@ -1,6 +1,5 @@
 "use client";
 import { createList } from "@/server/actions/createList";
-import { createListBoard } from "@/server/actions/createListBoard";
 import type { CreateListBoard, List } from "@/server/db/schema";
 import { useRef } from "react";
 import { toast } from "sonner";

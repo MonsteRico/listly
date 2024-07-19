@@ -1,7 +1,6 @@
 import { getBoard } from "@/server/actions/getBoard";
 import { Lists } from "@/components/Lists";
 import getUser from "@/lib/getUser";
-import { redirect } from "next/dist/server/api-utils";
 import { permanentRedirect } from "next/navigation";
 import { db } from "@/server/db";
 import { usersToBoards } from "@/server/db/schema";

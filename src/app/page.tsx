@@ -1,31 +1,7 @@
 import { Boards } from "@/components/Boards";
-import { CreateListBoard } from "@/components/CreateListBoard";
 import { LoginButton } from "@/components/LoginButton";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
 import { getListBoards } from "@/server/actions/getListBoards";
-import { authOptions, getServerAuthSession } from "@/server/auth";
-import { ListBoard } from "@/server/db/schema";
-import { Share, Trash } from "lucide-react";
-import { getServerSession } from "next-auth";
-import { signIn } from "next-auth/react";
-import Link from "next/link";
+import { getServerAuthSession } from "@/server/auth";
 
 export default async function HomePage() {
   const session = await getServerAuthSession();
