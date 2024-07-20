@@ -1,9 +1,10 @@
+"use server";
 import { eq } from "drizzle-orm";
 import { db } from "../db";
-import { listBoards, lists } from "../db/schema";
+import { listBoards } from "../db/schema";
 
 export async function moveLists(boardId: string, listOrder: string[]) {
-  db.update(listBoards)
+  await db.update(listBoards)
     .set({
       listOrder: [...listOrder],
     })

@@ -20,16 +20,22 @@ import {
 import { deleteList } from "@/server/actions/deleteList";
 import type { List, ListBoard, Item } from "@/server/db/schema";
 import { Plus, Trash } from "lucide-react";
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { addListItem } from "@/server/actions/addListItem";
 import { ListItem } from "./ListItems";
 import { CreateList } from "./CreateList";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
+import {
+  DragDropContext,
+  Droppable,
+  DropResult,
+  Draggable,
+} from "@hello-pangea/dnd";
 import { moveItems } from "@/server/actions/moveItems";
 import { deleteListItem } from "@/server/actions/deleteListItem";
 import { cn } from "@/lib/utils";
+import { moveLists } from "@/server/actions/moveLists";
 
 const ListsContext = createContext<{
   lists: List[];
@@ -62,7 +68,37 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
     listOrder.map((id) => listBoard.lists.find((l) => l.id === id)!),
   );
 
+  useEffect(() => {
+    setLists(listOrder.map((id) => listBoard.lists.find((l) => l.id === id)!));
+  }, [listOrder]);
+
   const onDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+    if (!destination) {
+      return;
+    }
+    if (result.type === "list") {
+      dragList(result);
+    } else if (result.type === "item") {
+      dragItem(result);
+    }
+  };
+
+  const dragList = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+    if (!destination) {
+      return;
+    }
+    const newListOrder = [...listOrder];
+    newListOrder.splice(source.index, 1);
+    newListOrder.splice(destination.index, 0, draggableId);
+    console.log("previous order", listOrder);
+    console.log("new order", newListOrder);
+    setListOrder(newListOrder);
+    moveLists(listBoard.id, newListOrder);
+  };
+
+  const dragItem = (result: DropResult) => {
     const { destination, source, draggableId } = result;
     if (!destination) {
       return;
@@ -119,68 +155,89 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
       <DragDropContext onDragEnd={onDragEnd}>
         <main
           ref={parent}
-          className="flex flex-wrap justify-center gap-4 overflow-x-auto"
         >
-          {lists.map((list) => (
-            <List key={list.id} list={list} />
-          ))}
-          <CreateList
-            boardId={listBoard.id}
-            listsState={lists}
-            setListsState={setLists}
-          />
+          <Droppable droppableId="lists" type="list" direction="horizontal">
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                className="flex flex-wrap justify-center gap-4 overflow-x-auto"
+              >
+                {lists.map((list) => (
+                  <List
+                    key={list.id}
+                    list={list}
+                    index={listOrder.indexOf(list.id)}
+                  />
+                ))}
+                {provided.placeholder}
+                <CreateList
+                  boardId={listBoard.id}
+                  listsState={lists}
+                  setListsState={setLists}
+                />
+              </div>
+            )}
+          </Droppable>
         </main>
       </DragDropContext>
     </ListsContext.Provider>
   );
 }
 
-function List({ list }: { list: List }) {
+function List({ list, index }: { list: List; index: number }) {
   const [parent, enableAnimations] = useAutoAnimate();
   const [items, setItems] = useState(list.items || []);
 
   return (
-    <Card className="max-h-[80dvh] min-w-64 max-w-xl overflow-y-auto">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <h2>{list.name}</h2>
-        <DeleteListButton list={list} />
-      </CardHeader>
-      <Droppable droppableId={list.id} type="list">
-        {(provided, snapshot) => {
-          return (
-            <div
-              className={cn(
-                "flex flex-col gap-2 py-2 transition duration-150",
-                snapshot.isDraggingOver && "bg-muted",
-              )}
-              ref={parent}
-              {...provided.droppableProps}
-            >
-              <CardContent
-                ref={provided.innerRef}
-                className="flex flex-col justify-between"
-              >
-                {items.map((item, index) => (
-                  <ListItem
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    onDelete={() => {
-                      setItems(items.filter((i) => i.id !== item.id));
-                      deleteListItem(item.id, list.id);
-                    }}
-                  />
-                ))}
-                {provided.placeholder}
-                <AddListItem list={list} items={items} setItems={setItems} />
-              </CardContent>
-            </div>
-          );
-        }}
-      </Droppable>
+    <Draggable draggableId={list.id} index={index}>
+      {(provided) => (
+        <Card {...provided.draggableProps} ref={provided.innerRef} className="max-h-[80dvh] min-w-64 max-w-xl overflow-y-auto">
+          <CardHeader {...provided.dragHandleProps} className="flex flex-row items-center justify-between">
+            <h2>{list.name}</h2>
+            <DeleteListButton list={list} />
+          </CardHeader>
+          <Droppable droppableId={list.id} type="item">
+            {(provided, snapshot) => {
+              return (
+                <div
+                  className={cn(
+                    "flex flex-col gap-2 py-2 transition duration-150",
+                    snapshot.isDraggingOver && "bg-muted",
+                  )}
+                  ref={parent}
+                  {...provided.droppableProps}
+                >
+                  <CardContent
+                    ref={provided.innerRef}
+                    className="flex flex-col justify-between"
+                  >
+                    {items.map((item, index) => (
+                      <ListItem
+                        key={item.id}
+                        item={item}
+                        index={index}
+                        onDelete={() => {
+                          setItems(items.filter((i) => i.id !== item.id));
+                          deleteListItem(item.id, list.id);
+                        }}
+                      />
+                    ))}
+                    {provided.placeholder}
+                    <AddListItem
+                      list={list}
+                      items={items}
+                      setItems={setItems}
+                    />
+                  </CardContent>
+                </div>
+              );
+            }}
+          </Droppable>
 
-      <CardFooter></CardFooter>
-    </Card>
+          <CardFooter></CardFooter>
+        </Card>
+      )}
+    </Draggable>
   );
 }
 
