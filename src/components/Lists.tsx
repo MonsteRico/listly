@@ -20,7 +20,14 @@ import {
 import { deleteList } from "@/server/actions/deleteList";
 import type { List, ListBoard, Item } from "@/server/db/schema";
 import { Plus, Trash } from "lucide-react";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import { addListItem } from "@/server/actions/addListItem";
 import { ListItem } from "./ListItems";
@@ -92,8 +99,6 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
     const newListOrder = [...listOrder];
     newListOrder.splice(source.index, 1);
     newListOrder.splice(destination.index, 0, draggableId);
-    console.log("previous order", listOrder);
-    console.log("new order", newListOrder);
     setListOrder(newListOrder);
     moveLists(listBoard.id, newListOrder);
   };
@@ -150,29 +155,37 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
     });
   };
 
+  const memoizedLists = useMemo(() => lists, [lists]);
+  const memoizedListOrder = useMemo(() => listOrder, [listOrder]);
+
   return (
-    <ListsContext.Provider value={{ lists, setLists, listOrder, setListOrder }}>
+    <ListsContext.Provider
+      value={{
+        lists: memoizedLists,
+        setLists,
+        listOrder: memoizedListOrder,
+        setListOrder,
+      }}
+    >
       <DragDropContext onDragEnd={onDragEnd}>
-        <main
-          ref={parent}
-        >
+        <main ref={parent}>
           <Droppable droppableId="lists" type="list" direction="horizontal">
             {(provided) => (
               <div
                 ref={provided.innerRef}
                 className="flex flex-wrap justify-center gap-4 overflow-x-auto"
               >
-                {lists.map((list) => (
+                {memoizedLists.map((list) => (
                   <List
                     key={list.id}
                     list={list}
-                    index={listOrder.indexOf(list.id)}
+                    index={memoizedListOrder.indexOf(list.id)}
                   />
                 ))}
                 {provided.placeholder}
                 <CreateList
                   boardId={listBoard.id}
-                  listsState={lists}
+                  listsState={memoizedLists}
                   setListsState={setLists}
                 />
               </div>
@@ -187,12 +200,20 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
 function List({ list, index }: { list: List; index: number }) {
   const [parent, enableAnimations] = useAutoAnimate();
   const [items, setItems] = useState(list.items || []);
+  const memoizedItems = useMemo(() => items, [items]);
 
   return (
     <Draggable draggableId={list.id} index={index}>
       {(provided) => (
-        <Card {...provided.draggableProps} ref={provided.innerRef} className="max-h-[80dvh] min-w-64 max-w-xl overflow-y-auto">
-          <CardHeader {...provided.dragHandleProps} className="flex flex-row items-center justify-between">
+        <Card
+          {...provided.draggableProps}
+          ref={provided.innerRef}
+          className="max-h-[80dvh] min-w-64 max-w-xl overflow-y-auto"
+        >
+          <CardHeader
+            {...provided.dragHandleProps}
+            className="flex flex-row items-center justify-between"
+          >
             <h2>{list.name}</h2>
             <DeleteListButton list={list} />
           </CardHeader>
@@ -211,7 +232,7 @@ function List({ list, index }: { list: List; index: number }) {
                     ref={provided.innerRef}
                     className="flex flex-col justify-between"
                   >
-                    {items.map((item, index) => (
+                    {memoizedItems.map((item, index) => (
                       <ListItem
                         key={item.id}
                         item={item}
