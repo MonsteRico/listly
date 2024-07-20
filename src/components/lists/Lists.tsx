@@ -8,6 +8,7 @@ import { moveItems } from "@/server/actions/lists/moveItems";
 import { moveLists } from "@/server/actions/lists/moveLists";
 import { ListsContext } from "./ListsContext";
 import { List } from "./List";
+import { cn } from "@/lib/utils";
 
 export function Lists({ listBoard }: { listBoard: ListBoard }) {
   const [parent, enableAnimations] = useAutoAnimate();
@@ -16,6 +17,7 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
   const [lists, setLists] = useState(
     listOrder.map((id) => listBoard.lists.find((l) => l.id === id)!),
   );
+  const [somethingDragging, setSomethingDragging] = useState(false);
 
   useEffect(() => {
     setLists(listOrder.map((id) => listBoard.lists.find((l) => l.id === id)!));
@@ -23,6 +25,7 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
 
   const onDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
+    setSomethingDragging(false);
     if (!destination) {
       return;
     }
@@ -107,15 +110,20 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
         setLists,
         listOrder: memoizedListOrder,
         setListOrder,
+        somethingDragging,
+        setSomethingDragging,
       }}
     >
       <DragDropContext onDragEnd={onDragEnd}>
-        <main ref={parent}>
+        <main className={cn(somethingDragging && "bg-red-500")} ref={parent}>
           <Droppable droppableId="lists" type="list" direction="horizontal">
             {(provided) => (
               <div
                 ref={provided.innerRef}
-                className="flex flex-wrap justify-center gap-4 overflow-x-auto"
+                className={cn(
+                  "flex h-screen gap-4 overflow-x-auto md:h-full md:flex-wrap md:justify-center",
+                  !somethingDragging && "snap-x snap-mandatory",
+                )}
               >
                 {memoizedLists.map((list) => (
                   <List

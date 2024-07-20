@@ -18,7 +18,7 @@ export function CreateList({
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   return (
-    <Card className="flex max-h-[80dvh] min-h-96 min-w-64 max-w-xl flex-col items-center justify-center gap-4 overflow-y-auto border-4 border-dashed bg-transparent focus-within:border-solid">
+    <Card className="flex max-h-[80dvh] min-h-96 min-w-[90dvw] snap-center md:min-w-64 md:max-w-xl flex-col items-center justify-center gap-4 overflow-y-auto border-4 border-dashed bg-transparent focus-within:border-solid">
       <form
         className="flex flex-col gap-4"
         ref={formRef}

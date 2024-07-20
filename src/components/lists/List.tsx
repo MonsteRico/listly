@@ -13,7 +13,7 @@ import type {
   MovieContent,
 } from "@/server/db/schema";
 import { Dot, Plus, Search, Star } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { addListItem } from "@/server/actions/lists/addListItem";
 import { ListItem } from "./ListItems";
@@ -35,19 +35,24 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { Label } from "../ui/label";
+import { ListsContext } from "./ListsContext";
 
 export function List({ list, index }: { list: List; index: number }) {
   const [parent, enableAnimations] = useAutoAnimate();
   const [items, setItems] = useState(list.items || []);
   const memoizedItems = useMemo(() => items, [items]);
-
+  const { somethingDragging, setSomethingDragging } = useContext(ListsContext);
   return (
     <Draggable draggableId={list.id} index={index}>
-      {(provided) => (
+      {(provided, snapshot) => {
+        if (snapshot.isDragging) {
+          setSomethingDragging(true);
+        }
+        return (
         <Card
           {...provided.draggableProps}
           ref={provided.innerRef}
-          className="max-h-[80dvh] min-w-64 max-w-xl overflow-y-auto"
+          className={cn("max-h-[80dvh] md:min-w-64 min-w-[90dvw] md:max-w-xl overflow-y-auto", !somethingDragging && "snap-center")}
         >
           <CardHeader
             {...provided.dragHandleProps}
@@ -105,7 +110,7 @@ export function List({ list, index }: { list: List; index: number }) {
 
           <CardFooter></CardFooter>
         </Card>
-      )}
+      )}}
     </Draggable>
   );
 }

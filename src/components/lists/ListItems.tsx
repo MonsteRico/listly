@@ -10,6 +10,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { ListsContext } from "./ListsContext";
+import { useContext } from "react";
 
 export function ListItem({
   item,
@@ -20,9 +22,14 @@ export function ListItem({
   index: number;
   onDelete: () => void;
 }) {
+  const { somethingDragging, setSomethingDragging } = useContext(ListsContext);
   return (
     <Draggable draggableId={item.id} index={index}>
-      {(provided, snapshot) => (
+      {(provided, snapshot) =>{
+        if (snapshot.isDragging) {
+          setSomethingDragging(true);
+        }
+        return (
         <Card
           className={cn(
             "mb-2 flex h-full w-full items-center bg-muted",
@@ -46,7 +53,7 @@ export function ListItem({
             <X />
           </Button>
         </Card>
-      )}
+      )}}
     </Draggable>
   );
 }
