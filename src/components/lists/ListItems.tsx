@@ -4,6 +4,12 @@ import { Draggable } from "@hello-pangea/dnd";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 export function ListItem({
   item,
@@ -62,7 +68,9 @@ function ListItemContent({
     case "book":
       return <ListItemBook isDragging={isDragging} item={item as ThingItem} />;
     case "tv_show":
-      return <ListItemTVShow isDragging={isDragging} item={item as ThingItem} />;
+      return (
+        <ListItemTVShow isDragging={isDragging} item={item as ThingItem} />
+      );
     default:
       return <div className="bg-red-500">{item.content.toString()}</div>;
   }
@@ -85,7 +93,21 @@ function ListItemMovie({
   item: MovieItem;
   isDragging: boolean;
 }) {
-  return <p>{item.content.title}</p>;
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <img
+            className="w-32"
+            src={`https://image.tmdb.org/t/p/original/${item.content.posterPath}`}
+          />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{item.content.title}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 }
 
 function ListItemGame({

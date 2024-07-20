@@ -3,14 +3,15 @@
 [x] Item component
 [x] Adding items to lists, removing, updating etc
 [x] Drag and drop between lists
-[ ] FIX BUILD ERROR b/c localStorage is not defined
-[ ] Drag and drop lists within a board
-[ ] List settings for renaming and setting default type
+[x] FIX BUILD ERROR b/c localStorage is not defined
+[x] Drag and drop lists within a board
+[ ] List settings for renaming and setting default type and deleting and maybe accent color
+[x] google oauth
 [ ] User settings for dark/light mode and setting their nickname
 [ ] Add buttons for different types of items (movies, games, books, tv shows)
 [ ] Board settings for renaming
 [ ] list accent colors? or board wide accent color? board background color?
 [ ] Ability to add Movies, Games, Books, and TV Shows to lists with preview images
-[ ] Good mobile experience
-[ ] "Last updated by" text and ability for user to change their nickname (also require nickname when they first come to site)
+[ ] Good mobile experience (scroll snapping)
+[ ] "Last updated by" on list items
 [ ] PWA? Notifications? An info page?

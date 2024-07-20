@@ -6,6 +6,7 @@ import {
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
+import GoogleProvider from "next-auth/providers/google";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
@@ -45,21 +46,26 @@ export const authOptions: NextAuthOptions = {
       const userId = user.id;
       const listBoardIds = await db.query.usersToBoards.findMany({
         where: eq(usersToBoards.userId, userId),
-      })
-      return ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-        listBoardIds: listBoardIds.map((lb) => lb.boardId),
-      },
-    })},
+      });
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+          listBoardIds: listBoardIds.map((lb) => lb.boardId),
+        },
+      };
+    },
   },
   adapter: DrizzleAdapter(db, createTable) as Adapter,
   providers: [
     DiscordProvider({
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
+    }),
+    GoogleProvider({
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
     }),
     /**
      * ...add more providers here.

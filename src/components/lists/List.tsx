@@ -6,8 +6,13 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import type { List, Item, ThingContent } from "@/server/db/schema";
-import { Plus, Search } from "lucide-react";
+import type {
+  List,
+  Item,
+  ThingContent,
+  MovieContent,
+} from "@/server/db/schema";
+import { Dot, Plus, Search, Star } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { addListItem } from "@/server/actions/lists/addListItem";
@@ -21,6 +26,15 @@ import { DeleteListButton } from "./DeleteListButton";
 import { Movie } from "tmdb-ts";
 import { useDebounce } from "@uidotdev/usehooks";
 import { searchMovies } from "@/server/actions/movies/searchMovies";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { Label } from "../ui/label";
 
 export function List({ list, index }: { list: List; index: number }) {
   const [parent, enableAnimations] = useAutoAnimate();
@@ -69,16 +83,20 @@ export function List({ list, index }: { list: List; index: number }) {
                       />
                     ))}
                     {provided.placeholder}
-                    {list.type === "thing" && <AddThingItem
-                      list={list}
-                      items={items}
-                      setItems={setItems}
-                    />}
-                    {list.type === "movie" && <AddMovieItem
-                      list={list}
-                      items={items}
-                      setItems={setItems}
-                    />}
+                    {list.type === "thing" && (
+                      <AddThingItem
+                        list={list}
+                        items={items}
+                        setItems={setItems}
+                      />
+                    )}
+                    {list.type === "movie" && (
+                      <AddMovieItem
+                        list={list}
+                        items={items}
+                        setItems={setItems}
+                      />
+                    )}
                   </CardContent>
                 </div>
               );
@@ -153,7 +171,7 @@ function AddMovieItem({
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState<Movie[]>([]);
   const debouncedQuery = useDebounce(query, 500);
-
+  const [open, setOpen] = useState(false);
   useEffect(() => {
     if (debouncedQuery.length === 0) {
       setMovies([]);
@@ -166,39 +184,71 @@ function AddMovieItem({
   }, [debouncedQuery]);
 
   return (
-    <form
-      className="relative flex flex-row rounded-lg border-2 border-dashed focus-within:border-solid"
-      ref={formRef}
-      action={async (formData) => {
-        // const { content } = Object.fromEntries(formData.entries()) as {
-        //   content: string;
-        // };
-        // if (!content || content.length === 0) {
-        //   toast.error("Content cannot be empty");
-        //   return;
-        // }
-        // const newItem = await addListItem(list.id, content, "thing");
-        // toast.success("Item added");
-        // setItems([...items, newItem]);
-        // formRef.current?.reset();
-      }}
-    >
-      <Input
-        type="text"
-        className="px-4 focus:outline-none"
-        name="content"
-        placeholder="New Item"
-        onChange={(e) => {
-          setQuery(e.target.value);
-        }}
-      />
-      <Search />
-      <div className="absolute top-[100%] bg-blue-500 text-xl text-white">
-        {movies &&
-          movies.map((movie) => {
-            return <p>{movie.title}</p>;
-          })}
-      </div>
-    </form>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          className="flex w-full flex-row rounded-lg border-2 border-dashed focus-within:border-solid"
+          variant="ghost"
+        >
+          Add a Movie
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="">
+        <DialogHeader>
+          <DialogTitle>Add a Movie</DialogTitle>
+        </DialogHeader>
+        <div className="items-center gap-4">
+          <Input
+            className=""
+            placeholder="Search for a movie"
+            onChange={(e) => {
+              setQuery(e.target.value);
+            }}
+          />
+        </div>
+        <div className="flex max-h-[60dvh] flex-col justify-center gap-4 overflow-auto">
+          {movies &&
+            movies.map((movie) => {
+              return (
+                <div
+                  onClick={async () => {
+                    const movieContent: MovieContent = {
+                      posterPath: movie.poster_path,
+                      title: movie.title,
+                    };
+                    const newItem = await addListItem(
+                      list.id,
+                      movieContent,
+                      "movie",
+                    );
+                    toast.success("Item added");
+                    setItems([...items, newItem]);
+                    setOpen(false);
+                  }}
+                  className="relative flex h-full w-full cursor-pointer flex-row items-center justify-between rounded-lg p-3 transition duration-150 hover:bg-muted"
+                >
+                  <div className="flex flex-col items-center justify-start p-4">
+                    <div className="flex w-full flex-row items-center justify-between gap-2">
+                      <p className="text-left text-base font-bold text-primary">
+                        {movie.title}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {movie.release_date}
+                      </p>
+                    </div>
+                    <p className="text-left text-sm text-muted-foreground">
+                      {movie.overview.substring(0, 100)}...
+                    </p>
+                  </div>
+                  <img
+                    className="w-24"
+                    src={`https://image.tmdb.org/t/p/original/${movie.poster_path}`}
+                  />
+                </div>
+              );
+            })}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
