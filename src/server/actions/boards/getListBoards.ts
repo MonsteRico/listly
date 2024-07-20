@@ -1,7 +1,7 @@
 "use server";
 import getUser from "@/lib/getUser";
-import { db } from "../db";
-import { ListBoard, listBoards, lists, usersToBoards } from "../db/schema";
+import { db } from "../../db";
+import { ListBoard, listBoards, lists, usersToBoards } from "../../db/schema";
 import { eq, inArray } from "drizzle-orm";
 
 export async function getListBoards(): Promise<ListBoard[]> {
@@ -14,7 +14,10 @@ export async function getListBoards(): Promise<ListBoard[]> {
     return [];
   }
   const userListBoards = await db.query.listBoards.findMany({
-    where: inArray(listBoards.id, userListBoardsRelation.map((ubr) => ubr.boardId)),
+    where: inArray(
+      listBoards.id,
+      userListBoardsRelation.map((ubr) => ubr.boardId),
+    ),
     with: { lists: true },
   });
 

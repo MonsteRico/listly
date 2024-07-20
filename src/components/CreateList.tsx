@@ -1,5 +1,5 @@
 "use client";
-import { createList } from "@/server/actions/createList";
+import { createList } from "@/server/actions/lists/createList";
 import type { CreateListBoard, List } from "@/server/db/schema";
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ export function CreateList({
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   return (
-    <Card className="flex max-h-[80dvh] min-w-64 max-w-xl flex-col items-center justify-center gap-4 overflow-y-auto bg-transparent border-4 border-dashed min-h-96 focus-within:border-solid">
+    <Card className="flex max-h-[80dvh] min-h-96 min-w-64 max-w-xl flex-col items-center justify-center gap-4 overflow-y-auto border-4 border-dashed bg-transparent focus-within:border-solid">
       <form
         className="flex flex-col gap-4"
         ref={formRef}

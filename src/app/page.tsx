@@ -1,6 +1,6 @@
 import { Boards } from "@/components/Boards";
 import { LoginButton } from "@/components/LoginButton";
-import { getListBoards } from "@/server/actions/getListBoards";
+import { getListBoards } from "@/server/actions/boards/getListBoards";
 import { getServerAuthSession } from "@/server/auth";
 
 export default async function HomePage() {

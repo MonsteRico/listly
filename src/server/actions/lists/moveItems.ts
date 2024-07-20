@@ -1,8 +1,8 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { Item, lists } from "../db/schema";
-import { db } from "../db";
+import { Item, lists } from "../../db/schema";
+import { db } from "../../db";
 import { revalidatePath } from "next/cache";
 
 export async function moveItems({

@@ -1,15 +1,21 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { db } from "../db";
-import { CreateListBoard, ListBoard, listBoards, users, usersToBoards } from "../db/schema";
+import { db } from "../../db";
+import {
+  CreateListBoard,
+  ListBoard,
+  listBoards,
+  users,
+  usersToBoards,
+} from "../../db/schema";
 import { eq } from "drizzle-orm";
 import getUser from "@/lib/getUser";
 
 export async function createListBoard({
   name,
 }: CreateListBoard): Promise<ListBoard> {
-    const user = await getUser();
-    if (!user) throw new Error("User not found");
+  const user = await getUser();
+  if (!user) throw new Error("User not found");
   const [newListBoard] = await db
     .insert(listBoards)
     .values({ name, listOrder: [], createdByUserId: user.id })

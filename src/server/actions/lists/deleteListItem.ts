@@ -1,8 +1,8 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { db } from "../db";
-import { lists } from "../db/schema";
+import { db } from "../../db";
+import { lists } from "../../db/schema";
 
 export async function deleteListItem(listItemId: string, listId: string) {
   const [list] = await db.select().from(lists).where(eq(lists.id, listId));

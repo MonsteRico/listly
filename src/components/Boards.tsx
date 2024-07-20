@@ -12,12 +12,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import { deleteListBoard } from "@/server/actions/deleteListBoard";
+import { Card, CardFooter, CardHeader } from "@/components/ui/card";
+import { deleteListBoard } from "@/server/actions/boards/deleteListBoard";
 import { ListBoard } from "@/server/db/schema";
 import { Share, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";

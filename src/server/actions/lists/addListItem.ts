@@ -1,13 +1,13 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { db } from "../db";
-import { ListBoard, listBoards, ItemTypes, lists } from "../db/schema";
+import { db } from "../../db";
+import { ListBoard, listBoards, ItemTypes, lists, ContentTypes } from "../../db/schema";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 export async function addListItem(
   id: string,
-  content: string,
+  content: ContentTypes,
   type: ItemTypes,
 ) {
   const [list] = await db.select().from(lists).where(eq(lists.id, id));

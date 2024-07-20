@@ -1,5 +1,5 @@
 "use client";
-import { createListBoard } from "@/server/actions/createListBoard";
+import { createListBoard } from "@/server/actions/boards/createListBoard";
 import type { CreateListBoard } from "@/server/db/schema";
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -10,10 +10,10 @@ import { Card, CardContent } from "./ui/card";
 export function CreateListBoard() {
   const formRef = useRef<HTMLFormElement>(null);
   return (
-    <Card className="flex flex-col justify-center items-center">
-      <CardContent className="flex flex-col justify-center items-center">
+    <Card className="flex flex-col items-center justify-center">
+      <CardContent className="flex flex-col items-center justify-center">
         <form
-          className="flex flex-col gap-2 justify-center items-center"
+          className="flex flex-col items-center justify-center gap-2"
           ref={formRef}
           action={async (formData) => {
             const { name } = Object.fromEntries(
@@ -22,10 +22,10 @@ export function CreateListBoard() {
             if (!name || name.length === 0 || !name.trim()) {
               toast.error("List Board name cannot be empty");
               return;
-            };
+            }
             const listBoard = await createListBoard({ name: name.trim() });
             toast.success("List Board created");
-            
+
             // clear form
             formRef.current?.reset();
           }}

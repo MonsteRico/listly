@@ -6,6 +6,7 @@ import {
   index,
   integer,
   jsonb,
+  pgEnum,
   pgTableCreator,
   primaryKey,
   serial,
@@ -122,6 +123,8 @@ export const listBoards = createTable("list_boards", {
   listOrder: jsonb("list_order").$type<string[]>().notNull(),
 });
 
+export const listTypes = pgEnum("list_types", ["thing", "movie", "game", "book", "tv_show"]);
+
 export const lists = createTable("lists", {
   id: uuid("id").primaryKey().defaultRandom(),
   boardId: uuid("board_id").notNull(),
@@ -131,6 +134,7 @@ export const lists = createTable("lists", {
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   updatedAt: timestamp("updatedAt", { withTimezone: true }),
+  type: listTypes("type").notNull().default("thing"),
 });
 
 export const listsRelations = relations(lists, ({ one }) => ({
@@ -159,9 +163,30 @@ export type ItemTypes = "thing" | "movie" | "game" | "book" | "tv_show";
 export type Item = {
   id: string;
   type: ItemTypes;
-  content: string;
+  content: ThingContent | MovieContent;
   createdAt: string;
   createdByUserId: string;
   updatedAt: string;
   updatedByUserId: string;
 };
+
+export type ThingContent = {
+  text: string;
+}
+
+export type MovieContent = {
+  title: string;
+  posterPath: string;
+};
+
+export type ContentTypes = ThingContent | MovieContent;
+
+export type MovieItem = Item & {
+  content: MovieContent;
+  type: "movie";
+}
+
+export type ThingItem = Item & {
+  content: ThingContent;
+  type: "thing";
+}

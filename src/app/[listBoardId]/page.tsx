@@ -1,5 +1,5 @@
-import { getBoard } from "@/server/actions/getBoard";
-import { Lists } from "@/components/Lists";
+import { getBoard } from "@/server/actions/boards/getBoard";
+import { Lists } from "@/components/lists/Lists";
 import getUser from "@/lib/getUser";
 import { permanentRedirect } from "next/navigation";
 import { db } from "@/server/db";
