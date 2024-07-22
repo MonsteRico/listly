@@ -115,7 +115,13 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
       }}
     >
       <DragDropContext onDragEnd={onDragEnd}>
-        <main className={cn(somethingDragging && "bg-red-500")} ref={parent}>
+        <main
+          className={cn(
+            "flex flex-row justify-center overflow-auto",
+            somethingDragging && "bg-red-500",
+          )}
+          ref={parent}
+        >
           <Droppable droppableId="lists" type="list" direction="horizontal">
             {(provided) => (
               <div

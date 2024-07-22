@@ -52,7 +52,7 @@ export function List({ list, index }: { list: List; index: number }) {
         <Card
           {...provided.draggableProps}
           ref={provided.innerRef}
-          className={cn("max-h-[80dvh] md:min-w-64 min-w-[90dvw] md:max-w-xl overflow-y-auto", !somethingDragging && "snap-center")}
+          className={cn("md:min-w-64 min-w-[90dvw] md:max-w-xl h-fit", !somethingDragging && "snap-center")}
         >
           <CardHeader
             {...provided.dragHandleProps}
