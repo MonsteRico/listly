@@ -22,24 +22,14 @@ export function ListItem({
   index: number;
   onDelete: () => void;
 }) {
-  const { somethingDragging, setSomethingDragging } = useContext(ListsContext);
   return (
-    <Draggable draggableId={item.id} index={index}>
-      {(provided, snapshot) =>{
-        if (snapshot.isDragging) {
-          setSomethingDragging(true);
-        }
-        return (
         <Card
           className={cn(
             "mb-2 flex h-full w-full items-center bg-muted",
-            snapshot.isDragging && "bg-accent",
           )}
-          ref={provided.innerRef}
-          {...provided.draggableProps}
         >
-          <div {...provided.dragHandleProps} className="h-full w-3/4 py-2 pl-4">
-            <ListItemContent isDragging={snapshot.isDragging} item={item} />
+          <div className="h-full w-3/4 py-2 pl-4">
+            <ListItemContent isDragging={false} item={item} />
           </div>
           <Button
             variant="ghost"
@@ -53,8 +43,6 @@ export function ListItem({
             <X />
           </Button>
         </Card>
-      )}}
-    </Draggable>
   );
 }
 

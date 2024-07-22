@@ -41,77 +41,41 @@ export function List({ list, index }: { list: List; index: number }) {
   const [parent, enableAnimations] = useAutoAnimate();
   const [items, setItems] = useState(list.items || []);
   const memoizedItems = useMemo(() => items, [items]);
-  const { somethingDragging, setSomethingDragging } = useContext(ListsContext);
-  return (
-    <Draggable draggableId={list.id} index={index}>
-      {(provided, snapshot) => {
-        if (snapshot.isDragging) {
-          setSomethingDragging(true);
-        }
-        return (
-        <Card
-          {...provided.draggableProps}
-          ref={provided.innerRef}
-          className={cn("md:min-w-64 min-w-[90dvw] md:max-w-xl h-fit", !somethingDragging && "snap-center")}
-        >
-          <CardHeader
-            {...provided.dragHandleProps}
-            className="flex flex-row items-center justify-between"
-          >
-            <h2>{list.name}</h2>
-            <DeleteListButton list={list} />
-          </CardHeader>
-          <Droppable droppableId={list.id} type="item">
-            {(provided, snapshot) => {
-              return (
-                <div
-                  className={cn(
-                    "flex flex-col gap-2 py-2 transition duration-150",
-                    snapshot.isDraggingOver && "bg-muted",
-                  )}
-                  ref={parent}
-                  {...provided.droppableProps}
-                >
-                  <CardContent
-                    ref={provided.innerRef}
-                    className="flex flex-col justify-between"
-                  >
-                    {memoizedItems.map((item, index) => (
-                      <ListItem
-                        key={item.id}
-                        item={item}
-                        index={index}
-                        onDelete={() => {
-                          setItems(items.filter((i) => i.id !== item.id));
-                          deleteListItem(item.id, list.id);
-                        }}
-                      />
-                    ))}
-                    {provided.placeholder}
-                    {list.type === "thing" && (
-                      <AddThingItem
-                        list={list}
-                        items={items}
-                        setItems={setItems}
-                      />
-                    )}
-                    {list.type === "movie" && (
-                      <AddMovieItem
-                        list={list}
-                        items={items}
-                        setItems={setItems}
-                      />
-                    )}
-                  </CardContent>
-                </div>
-              );
-            }}
-          </Droppable>
 
-          <CardFooter></CardFooter>
-        </Card>
-      )}}
-    </Draggable>
+  
+
+  return (
+    <Card className={cn("h-fit min-w-[90dvw] md:min-w-64 md:max-w-xl")}>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <h2>{list.name}</h2>
+        <DeleteListButton list={list} />
+      </CardHeader>
+      <div
+        className={cn("flex flex-col gap-2 py-2 transition duration-150")}
+        ref={parent}
+      >
+        <CardContent className="flex flex-col justify-between">
+          {memoizedItems.map((item, index) => (
+            <ListItem
+              key={item.id}
+              item={item}
+              index={index}
+              onDelete={() => {
+                setItems(items.filter((i) => i.id !== item.id));
+                deleteListItem(item.id, list.id);
+              }}
+            />
+          ))}
+          {list.type === "thing" && (
+            <AddThingItem list={list} items={items} setItems={setItems} />
+          )}
+          {list.type === "movie" && (
+            <AddMovieItem list={list} items={items} setItems={setItems} />
+          )}
+        </CardContent>
+      </div>
+      <CardFooter></CardFooter>
+    </Card>
   );
 }
 

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^0.7.0",
+    "@dnd-kit/core": "^6.1.0",
     "@formkit/auto-animate": "^0.8.2",
     "@hello-pangea/dnd": "^16.6.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",

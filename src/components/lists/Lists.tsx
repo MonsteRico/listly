@@ -3,12 +3,12 @@ import type { ListBoard } from "@/server/db/schema";
 import { useEffect, useMemo, useState } from "react";
 import { CreateList } from "../CreateList";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { DragDropContext, Droppable, DropResult } from "@hello-pangea/dnd";
 import { moveItems } from "@/server/actions/lists/moveItems";
 import { moveLists } from "@/server/actions/lists/moveLists";
 import { ListsContext } from "./ListsContext";
 import { List } from "./List";
 import { cn } from "@/lib/utils";
+import { DndContext } from "@dnd-kit/core";
 
 export function Lists({ listBoard }: { listBoard: ListBoard }) {
   const [parent, enableAnimations] = useAutoAnimate();
@@ -23,7 +23,7 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
     setLists(listOrder.map((id) => listBoard.lists.find((l) => l.id === id)!));
   }, [listOrder]);
 
-  const onDragEnd = (result: DropResult) => {
+  const onDragEnd = (result: any) => {
     const { destination, source, draggableId } = result;
     setSomethingDragging(false);
     if (!destination) {
@@ -36,7 +36,7 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
     }
   };
 
-  const dragList = (result: DropResult) => {
+  const dragList = (result: any) => {
     const { destination, source, draggableId } = result;
     if (!destination) {
       return;
@@ -48,7 +48,7 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
     moveLists(listBoard.id, newListOrder);
   };
 
-  const dragItem = (result: DropResult) => {
+  const dragItem = (result: any) => {
     const { destination, source, draggableId } = result;
     if (!destination) {
       return;
@@ -114,7 +114,7 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
         setSomethingDragging,
       }}
     >
-      <DragDropContext onDragEnd={onDragEnd}>
+      
         <main
           className={cn(
             "flex flex-row justify-center overflow-auto",
@@ -122,10 +122,7 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
           )}
           ref={parent}
         >
-          <Droppable droppableId="lists" type="list" direction="horizontal">
-            {(provided) => (
               <div
-                ref={provided.innerRef}
                 className={cn(
                   "flex h-screen gap-4 overflow-x-auto md:h-full md:flex-wrap md:justify-center",
                   !somethingDragging && "snap-x snap-mandatory",
@@ -138,17 +135,13 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
                     index={memoizedListOrder.indexOf(list.id)}
                   />
                 ))}
-                {provided.placeholder}
                 <CreateList
                   boardId={listBoard.id}
                   listsState={memoizedLists}
                   setListsState={setLists}
                 />
               </div>
-            )}
-          </Droppable>
         </main>
-      </DragDropContext>
     </ListsContext.Provider>
   );
 }
