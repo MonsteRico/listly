@@ -1,4 +1,4 @@
-import { List } from "@/server/db/schema";
+import { Item, List } from "@/server/db/schema";
 import { createContext } from "react";
 
 
@@ -7,13 +7,13 @@ export const ListsContext = createContext<{
   setLists: React.Dispatch<React.SetStateAction<List[]>>;
   listOrder: string[];
   setListOrder: React.Dispatch<React.SetStateAction<string[]>>;
-  somethingDragging: boolean;
-  setSomethingDragging: React.Dispatch<React.SetStateAction<boolean>>;
+  draggedItem: Item | null;
+  setDraggedItem: React.Dispatch<React.SetStateAction<Item | null>>;
 }>({
   lists: [],
   setLists: () => {},
   listOrder: [],
   setListOrder: () => {},
-  somethingDragging: false,
-  setSomethingDragging: () => {},
+  draggedItem: null,
+  setDraggedItem: () => {},
 });

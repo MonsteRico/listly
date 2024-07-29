@@ -16,6 +16,7 @@ export async function addListItem(
 
   const newItem = {
     id: uuidv4(),
+    listId: id,
     type,
     content,
     createdAt: new Date().toISOString(),

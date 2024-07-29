@@ -162,6 +162,7 @@ export type ListBoard = typeof listBoards.$inferSelect & { lists: List[] };
 export type ItemTypes = "thing" | "movie" | "game" | "book" | "tv_show";
 export type Item = {
   id: string;
+  listId: string;
   type: ItemTypes;
   content: ThingContent | MovieContent;
   createdAt: string;

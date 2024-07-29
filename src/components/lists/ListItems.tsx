@@ -11,8 +11,9 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { ListsContext } from "./ListsContext";
-import { useContext } from "react";
-
+import { useContext, useEffect, useRef, useState } from "react";
+import invariant from "tiny-invariant";
+import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 export function ListItem({
   item,
   index,
@@ -22,27 +23,57 @@ export function ListItem({
   index: number;
   onDelete: () => void;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { draggedItem, setDraggedItem } = useContext(ListsContext);
+
+  const isDragging = draggedItem?.id === item.id;
+  useEffect(() => {
+    const el = ref.current;
+    invariant(el);
+
+    return draggable({
+      element: el,
+      onDragStart: () => {
+        setDraggedItem(item);
+      },
+      onDrop: () => {
+        setDraggedItem(null);
+      },
+      getInitialData: () => ({
+        type: "item",
+        id: item.id,
+        index,
+        item,
+      }),
+    });
+  }, [item]);
+
   return (
-        <Card
-          className={cn(
-            "mb-2 flex h-full w-full items-center bg-muted",
-          )}
-        >
-          <div className="h-full w-3/4 py-2 pl-4">
-            <ListItemContent isDragging={false} item={item} />
-          </div>
-          <Button
-            variant="ghost"
-            className="h-full w-1/4 text-muted-foreground hover:bg-muted-foreground/10"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              onDelete();
-            }}
-          >
-            <X />
-          </Button>
-        </Card>
+    <Card
+      ref={ref}
+      className={cn(
+        "group mb-2 flex h-full w-full items-center bg-muted",
+        isDragging && "border-2 border-primary bg-muted-foreground/10",
+      )}
+    >
+      <div className={cn("h-full w-3/4 py-2 pl-4", isDragging && "opacity-0")}>
+        <ListItemContent isDragging={false} item={item} />
+      </div>
+      <Button
+        variant="ghost"
+        className={cn(
+          "h-full w-1/4 text-muted-foreground opacity-0 hover:bg-muted-foreground/10 group-hover:opacity-100",
+          isDragging && "hidden",
+        )}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          onDelete();
+        }}
+      >
+        <X />
+      </Button>
+    </Card>
   );
 }
 

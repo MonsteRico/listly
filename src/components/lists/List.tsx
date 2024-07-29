@@ -36,13 +36,66 @@ import {
 } from "../ui/dialog";
 import { Label } from "../ui/label";
 import { ListsContext } from "./ListsContext";
+import invariant from "tiny-invariant";
+import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 
-export function List({ list, index }: { list: List; index: number }) {
+export function List({
+  list,
+  index,
+  _items,
+}: {
+  list: List;
+  index: number;
+  items: Item[];
+}) {
   const [parent, enableAnimations] = useAutoAnimate();
   const [items, setItems] = useState(list.items || []);
-  const memoizedItems = useMemo(() => items, [items]);
 
-  
+  useEffect(() => {
+    console.log("list updated");
+    setItems(list.items || []);
+  }, [list.items]);
+
+  const ref = useRef(null);
+  const [isDraggedOver, setIsDraggedOver] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    invariant(el);
+
+    return dropTargetForElements({
+      element: el,
+      onDragEnter: ({ source }) => {
+        setIsDraggedOver(true);
+        setItems((items) => {
+          const sourceData = source.data;
+          if (sourceData.type === "list") {
+            return items;
+          }
+          const item = sourceData.item as Item;
+          return [...items, item];
+        })
+      },
+      onDragLeave: ({source}) => {
+        setIsDraggedOver(false);
+        setItems((items) => {
+          const sourceData = source.data;
+          if (sourceData.type === "list") {
+            return items;
+          }
+          const item = sourceData.item as Item;
+          return items.filter((i) => i.id !== item.id);
+        })
+      },
+      onDrop: () => setIsDraggedOver(false),
+      getData: () => ({
+        type: "list",
+        id: list.id,
+        index,
+        list,
+      }),
+    });
+  }, []);
 
   return (
     <Card className={cn("h-fit min-w-[90dvw] md:min-w-64 md:max-w-xl")}>
@@ -54,8 +107,14 @@ export function List({ list, index }: { list: List; index: number }) {
         className={cn("flex flex-col gap-2 py-2 transition duration-150")}
         ref={parent}
       >
-        <CardContent className="flex flex-col justify-between">
-          {memoizedItems.map((item, index) => (
+        <CardContent
+          ref={ref}
+          className={cn(
+            "flex flex-col justify-between",
+            isDraggedOver && "bg-red-500",
+          )}
+        >
+          {items.map((item, index) => (
             <ListItem
               key={item.id}
               item={item}
