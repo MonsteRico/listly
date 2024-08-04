@@ -38,65 +38,30 @@ import { Label } from "../ui/label";
 import { ListsContext } from "./ListsContext";
 import invariant from "tiny-invariant";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
+import { set } from "zod";
 
-export function List({
-  list,
-  index,
-  _items,
-}: {
-  list: List;
-  index: number;
-  items: Item[];
-}) {
+export function List({ list, index }: { list: List; index: number }) {
   const [parent, enableAnimations] = useAutoAnimate();
   const [items, setItems] = useState(list.items || []);
-
+  const { lists, setLists } = useContext(ListsContext);
   useEffect(() => {
     console.log("list updated");
     setItems(list.items || []);
   }, [list.items]);
 
   const ref = useRef(null);
-  const [isDraggedOver, setIsDraggedOver] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    invariant(el);
-
-    return dropTargetForElements({
-      element: el,
-      onDragEnter: ({ source }) => {
-        setIsDraggedOver(true);
-        setItems((items) => {
-          const sourceData = source.data;
-          if (sourceData.type === "list") {
-            return items;
-          }
-          const item = sourceData.item as Item;
-          return [...items, item];
-        })
-      },
-      onDragLeave: ({source}) => {
-        setIsDraggedOver(false);
-        setItems((items) => {
-          const sourceData = source.data;
-          if (sourceData.type === "list") {
-            return items;
-          }
-          const item = sourceData.item as Item;
-          return items.filter((i) => i.id !== item.id);
-        })
-      },
-      onDrop: () => setIsDraggedOver(false),
-      getData: () => ({
-        type: "list",
-        id: list.id,
-        index,
-        list,
-      }),
-    });
-  }, []);
-
+  const { setNodeRef, isOver } = useDroppable({
+    id: list.id,
+    data: {
+      type: "List",
+      list,
+    },
+  });
   return (
     <Card className={cn("h-fit min-w-[90dvw] md:min-w-64 md:max-w-xl")}>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -108,23 +73,31 @@ export function List({
         ref={parent}
       >
         <CardContent
-          ref={ref}
-          className={cn(
-            "flex flex-col justify-between",
-            isDraggedOver && "bg-red-500",
-          )}
+          ref={setNodeRef}
+          className={cn("flex w-full flex-col justify-between")}
         >
-          {items.map((item, index) => (
-            <ListItem
-              key={item.id}
-              item={item}
-              index={index}
-              onDelete={() => {
-                setItems(items.filter((i) => i.id !== item.id));
-                deleteListItem(item.id, list.id);
-              }}
-            />
-          ))}
+          <SortableContext
+            items={items.map((i) => i.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {items.map((item, index) => (
+              <ListItem
+                key={item.id}
+                item={item}
+                index={index}
+                onDelete={() => {
+                  setItems(items.filter((i) => i.id !== item.id));
+                  lists.forEach((listFromState) => {
+                    if (listFromState.id == list.id) {
+                      listFromState.items.filter((i) => i.id != item.id);
+                    }
+                  });
+                  setLists(lists);
+                  deleteListItem(item.id, list.id);
+                }}
+              />
+            ))}
+          </SortableContext>
           {list.type === "thing" && (
             <AddThingItem list={list} items={items} setItems={setItems} />
           )}

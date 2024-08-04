@@ -1,5 +1,5 @@
 "use client";
-import type { Item, ListBoard } from "@/server/db/schema";
+import type { Item, List as ListType, ListBoard } from "@/server/db/schema";
 import { useEffect, useMemo, useState } from "react";
 import { CreateList } from "../CreateList";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -8,8 +8,14 @@ import { moveLists } from "@/server/actions/lists/moveLists";
 import { ListsContext } from "./ListsContext";
 import { List } from "./List";
 import { cn } from "@/lib/utils";
-import { DndContext } from "@dnd-kit/core";
-import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import {
+  DndContext,
+  type DragEndEvent,
+  type DragOverEvent,
+  DragOverlay,
+} from "@dnd-kit/core";
+import { ListItem } from "./ListItems";
+import { arrayMove } from "@dnd-kit/sortable";
 
 export function Lists({ listBoard }: { listBoard: ListBoard }) {
   const [parent, enableAnimations] = useAutoAnimate();
@@ -18,201 +24,152 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
   const [lists, setLists] = useState(
     listOrder.map((id) => listBoard.lists.find((l) => l.id === id)!),
   );
-  
 
   useEffect(() => {
     setLists(listOrder.map((id) => listBoard.lists.find((l) => l.id === id)!));
-  }, [listOrder]);
+  }, [listOrder, listBoard.lists]);
 
-  useEffect(() => {
-    return monitorForElements({
-      onDrop({ source, location }) {
-        const destination = location.current.dropTargets[0];
-        if (!destination) {
-          // if dropped outside of any drop targets
-          return;
-        }
 
-        setDraggedItem(null);
-        const destinationData = destination.data;
-        const sourceData = source.data;
-        const destinationType = destinationData.type;
-        const sourceType = sourceData.type;
-        console.log("source", sourceData);
-        console.log("destination", destinationData);
-        if (sourceType == "item" && destinationType == "list") {
-          const item = sourceData.item as Item;
-          const originListId = item.listId;
-          const destinationListId = destinationData.id as string;
-          const itemIndex = lists
-            .find((list) => list.id === originListId)!
-            .items.indexOf(item);
-
-          console.log(
-            "Moving item id",
-            item.id,
-            "from",
-            originListId,
-            "to",
-            destinationListId,
-          );
-          const originList = lists.find((list) => list.id === originListId)!;
-          const destinationList = lists.find(
-            (list) => list.id === destinationListId,
-          )!;
-          console.log("originList", originList);
-          console.log("destinationList", destinationList);
-          const listsCopy = [...lists];
-          listsCopy.forEach((list) => {
-            if (list.id === originListId) {
-              list.items = list.items.filter((i) => i.id !== item.id);
-              console.log("originList.items", list.items);
-            }
-            if (list.id === destinationListId) {
-              list.items = [
-                ...list.items,
-                { ...item, listId: destinationListId },
-              ];
-              item.listId = destinationListId;
-              console.log("destinationList.items", list.items);
-            }
-          });
-          setLists(listsCopy);
-        }
-      },
-      onDropTargetChange({ source, location }) {
-        return;
-        console.log("onDropTargetChange");
-        const destination = location.current.dropTargets[0];
-        if (!destination) {
-          // if dropped outside of any drop targets
-          return;
-        }
-        const destinationData = destination.data;
-        const sourceData = source.data;
-        const destinationType = destinationData.type;
-        const sourceType = sourceData.type;
-        if (sourceType == "item" && destinationType == "list") {
-          const item = sourceData.item as Item;
-          const originListId = item.listId;
-          const destinationListId = destinationData.id as string;
-          if (originListId === destinationListId) {
-            return;
+  const onDragEnd = (result: DragEndEvent) => {
+    const { active, over } = result;
+    setDraggedItem(null);
+    console.log("active", active);
+    console.log("over", over);
+    if (!over) return;
+    if (active.id == over.id) return;
+    const activeData = active.data.current as {
+      type: "Item" | "List";
+      item?: Item;
+      list?: ListType;
+      index: number;
+    };
+    const overData = over.data.current as {
+      type: "Item" | "List";
+      item?: Item;
+      list?: ListType;
+      index: number;
+    }
+    if (!activeData || !overData) return;
+    const activeType = activeData.type;
+    const overType = overData.type;
+    if (activeType == "Item" && overType == "Item") {
+      const overItem = overData.item!;
+      const activeItem = activeData.item!;
+      const overListId = overItem.listId;
+      const activeListId = activeItem.listId;
+      if (overListId === activeListId) {
+        // Move item within list
+        lists.forEach((list) => {
+          if (list.id === overListId) {
+            list.items = arrayMove(
+              list.items,
+              activeData.index,
+              overData.index,
+            );
+            void moveItems({
+              destinationListId: overListId,
+              item: activeItem,
+              newIndex: overData.index,
+              originListId: activeListId,
+              originalIndex: activeData.index,
+            });
           }
-          const itemIndex = lists
-            .find((list) => list.id === originListId)!
-            .items.indexOf(item);
-
-          console.log(
-            "Moving item id",
-            item.id,
-            "from",
-            originListId,
-            "to",
-            destinationListId,
-          );
-          const originList = lists.find((list) => list.id === originListId)!;
-          const destinationList = lists.find(
-            (list) => list.id === destinationListId,
-          )!;
-          console.log("originList", originList);
-          console.log("destinationList", destinationList);
-          lists.forEach((list) => {
-            if (list.id === originListId) {
-              list.items = list.items.filter((i) => i.id !== item.id);
-              console.log("originList.items", list.items);
-            }
-            if (list.id === destinationListId) {
-              list.items = [
-                ...list.items,
-                { ...item, listId: destinationListId },
-              ];
-              console.log("destinationList.items", list.items);
-              item.listId = destinationListId;
-            }
-          });
-          setLists(lists);
-        }
-      },
-    });
-  }, []);
-
-  const onDragEnd = (result: any) => {
-    const { destination, source, draggableId } = result;
-    setSomethingDragging(false);
-    if (!destination) {
-      return;
-    }
-    if (result.type === "list") {
-      dragList(result);
-    } else if (result.type === "item") {
-      dragItem(result);
+        });
+      }
     }
   };
 
-  const dragList = (result: any) => {
-    const { destination, source, draggableId } = result;
-    if (!destination) {
-      return;
+  const onDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    console.log("active", active);
+    console.log("over", over);
+    if (!over) return;
+    if (active.id == over.id) return;
+    const activeData = active.data.current as {
+      type: "Item" | "List";
+      item?: Item;
+      list?: ListType;
+      index: number;
+    };
+    const overData = over.data.current as {
+      type: "Item" | "List";
+      item?: Item;
+      list?: ListType;
+      index: number;
     }
-    const newListOrder = [...listOrder];
-    newListOrder.splice(source.index, 1);
-    newListOrder.splice(destination.index, 0, draggableId);
-    setListOrder(newListOrder);
-    moveLists(listBoard.id, newListOrder);
+    if (!activeData || !overData) return;
+    const activeType = activeData.type;
+    const overType = overData.type;
+    if (activeType == "Item" && overType == "List") {
+      const activeItem = activeData.item!;
+      const overList = overData.list!;
+      if (overList.items.length > 0) {
+        return;
+      }
+      console.log("moving to empty list");
+      const overListId = overList.id;
+
+      const activeListId = activeItem.listId;
+      lists.forEach((list) => {
+        if (list.id === overListId) {
+          console.log("adding to empty list");
+          list.items = [...list.items, { ...activeItem, listId: overListId }];
+        }
+        if (list.id === activeListId) {
+          list.items = list.items.filter((i) => i.id !== activeItem.id);
+        }
+      });
+      void moveItems({
+        item: activeItem,
+        originListId: activeListId,
+        destinationListId:overListId,
+        originalIndex:activeData.index,
+        newIndex:0
+      })
+    } else if (activeType == "Item" && overType == "Item") {
+      const activeItem = activeData.item!;
+      const overItem = overData.item!;
+      if (activeItem.listId === overItem.listId) {
+        return;
+      } else {
+        // Move item to other list
+        const originListId = activeItem.listId;
+        const destinationListId = overItem.listId;
+        lists.forEach((list) => {
+          if (list.id === originListId) {
+            list.items = list.items.filter((i) => i.id !== activeItem.id);
+          }
+          if (list.id === destinationListId) {
+            list.items = [
+              ...list.items,
+              { ...activeItem, listId: destinationListId },
+            ];
+          }
+        });
+        void moveItems({
+          item: activeItem,
+          originalIndex: activeData.index,
+          originListId,
+          destinationListId,
+          newIndex: overData.index
+        })
+      }
+    }
+    setLists(lists);
   };
 
-  const dragItem = (result: any) => {
-    const { destination, source, draggableId } = result;
-    if (!destination) {
-      return;
-    }
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }
-    const sourceList = lists.find((list) => list.id === source.droppableId);
-    if (!sourceList) {
-      return;
-    }
-    const destinationList = lists.find(
-      (list) => list.id === destination.droppableId,
-    );
-    if (!destinationList) {
-      return;
-    }
-    // update the items in the source list and destination list in state
-    const draggedItem = sourceList.items.find(
-      (item) => item.id === draggableId,
-    );
-    if (!draggedItem) {
-      return;
-    }
-    // update the source list
-    sourceList.items.splice(source.index, 1);
-    destinationList.items.splice(destination.index, 0, draggedItem);
-    // update state
-    setLists(
-      lists.map((list) => {
-        if (list.id === source.droppableId) {
-          return sourceList;
-        }
-        if (list.id === destination.droppableId) {
-          return destinationList;
-        }
-        return list;
-      }),
-    );
-    moveItems({
-      item: draggedItem,
-      originListId: source.droppableId,
-      destinationListId: destination.droppableId,
-      originalIndex: source.index,
-      newIndex: destination.index,
-    });
-  };
+  // const dragList = (result: any) => {
+  //   const { destination, source, draggableId } = result;
+  //   if (!destination) {
+  //     return;
+  //   }
+  //   const newListOrder = [...listOrder];
+  //   newListOrder.splice(source.index, 1);
+  //   newListOrder.splice(destination.index, 0, draggableId);
+  //   setListOrder(newListOrder);
+  //   moveLists(listBoard.id, newListOrder);
+  // };
+
 
   const memoizedLists = useMemo(() => lists, [lists]);
   const memoizedListOrder = useMemo(() => listOrder, [listOrder]);
@@ -227,35 +184,50 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
         listOrder: memoizedListOrder,
         setListOrder,
         draggedItem,
-        setDraggedItem
+        setDraggedItem,
       }}
     >
-      <main
-        className={cn(
-          "flex flex-row justify-center overflow-auto",
-        )}
-        ref={parent}
+      <DndContext
+        onDragOver={onDragOver}
+        onDragStart={({ active }) => {
+          if (!active.data.current) return;
+          if (active.data.current.type == "Item") {
+            setDraggedItem(active.data.current.item as Item);
+          }
+        }}
+        onDragEnd={onDragEnd}
       >
-        <div
-          className={cn(
-            "flex h-screen gap-4 overflow-x-auto md:h-full md:flex-wrap md:justify-center",
-          )}
+        <main
+          className={cn("flex flex-row justify-center overflow-auto")}
+          ref={parent}
         >
-          {lists.map((list) => (
-            <List
-              key={list.id}
-              list={list}
-              items={list.items}
-              index={memoizedListOrder.indexOf(list.id)}
+          <div
+            className={cn(
+              "flex h-screen gap-4 overflow-x-auto md:h-full md:flex-wrap md:justify-center",
+            )}
+          >
+            {lists.map((list) => (
+              <List
+                key={list.id}
+                list={list}
+                index={memoizedListOrder.indexOf(list.id)}
+              />
+            ))}
+            <CreateList
+              boardId={listBoard.id}
+              listsState={memoizedLists}
+              setListsState={setLists}
             />
-          ))}
-          <CreateList
-            boardId={listBoard.id}
-            listsState={memoizedLists}
-            setListsState={setLists}
-          />
-        </div>
-      </main>
+          </div>
+        </main>
+        <DragOverlay>
+          {draggedItem && (
+            <ListItem item={draggedItem} index={0} onDelete={() => {
+              return;
+            }} />
+          )}
+        </DragOverlay>
+      </DndContext>
     </ListsContext.Provider>
   );
 }

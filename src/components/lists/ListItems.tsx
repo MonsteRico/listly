@@ -14,6 +14,8 @@ import { ListsContext } from "./ListsContext";
 import { useContext, useEffect, useRef, useState } from "react";
 import invariant from "tiny-invariant";
 import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 export function ListItem({
   item,
   index,
@@ -24,39 +26,29 @@ export function ListItem({
   onDelete: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const { draggedItem, setDraggedItem } = useContext(ListsContext);
 
-  const isDragging = draggedItem?.id === item.id;
-  useEffect(() => {
-    const el = ref.current;
-    invariant(el);
 
-    return draggable({
-      element: el,
-      onDragStart: () => {
-        setDraggedItem(item);
-      },
-      onDrop: () => {
-        setDraggedItem(null);
-      },
-      getInitialData: () => ({
-        type: "item",
-        id: item.id,
-        index,
-        item,
-      }),
-    });
-  }, [item]);
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: item.id, data: { type: "Item", item, index } });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   return (
     <Card
-      ref={ref}
+      style={style}
+      {...attributes}
+      ref={setNodeRef}
       className={cn(
         "group mb-2 flex h-full w-full items-center bg-muted",
         isDragging && "border-2 border-primary bg-muted-foreground/10",
       )}
     >
-      <div className={cn("h-full w-3/4 py-2 pl-4", isDragging && "opacity-0")}>
+      <div
+        {...listeners}
+        className={cn("h-full w-3/4 py-2 pl-4", isDragging && "opacity-0")}
+      >
         <ListItemContent isDragging={false} item={item} />
       </div>
       <Button
