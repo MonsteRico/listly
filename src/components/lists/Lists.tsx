@@ -179,7 +179,8 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
         >
           <div
             className={cn(
-              "flex h-screen gap-4 overflow-x-auto md:h-full md:flex-wrap md:justify-center snap-x snap-mandatory md:snap-none",
+              "flex h-screen gap-4 overflow-x-auto md:h-full md:snap-none md:flex-wrap  md:justify-center",
+              !draggedItem && "snap-x snap-mandatory",
             )}
           >
             {lists.map((list) => (
