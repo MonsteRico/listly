@@ -13,7 +13,7 @@ import type {
   MovieContent,
 } from "@/server/db/schema";
 import { Dot, Plus, Search, Star } from "lucide-react";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { use, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { addListItem } from "@/server/actions/lists/addListItem";
 import { ListItem } from "./ListItems";
@@ -44,15 +44,21 @@ import {
 } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { set } from "zod";
+import { setListItems } from "@/server/actions/lists/setListItems";
 
 export function List({ list, index }: { list: List; index: number }) {
   const [parent, enableAnimations] = useAutoAnimate();
   const [items, setItems] = useState(list.items || []);
   const { lists, setLists } = useContext(ListsContext);
+  const debouncedList = useDebounce(list, 500);
   useEffect(() => {
     console.log("list updated");
     setItems(list.items || []);
   }, [list.items]);
+
+  useEffect(() => {
+    void setListItems({ listId: debouncedList.id, items });
+  }, [debouncedList, items]);
 
   const ref = useRef(null);
   const { setNodeRef, isOver } = useDroppable({
@@ -93,7 +99,7 @@ export function List({ list, index }: { list: List; index: number }) {
                     }
                   });
                   setLists(lists);
-                  deleteListItem(item.id, list.id);
+                  void deleteListItem(item.id, list.id);
                 }}
               />
             ))}
@@ -137,10 +143,11 @@ function AddThingItem({
           text,
         };
         const newItem = await addListItem(
-          list.id,
-          newThingItemContent,
-          "thing",
+        {  listId:list.id,
+          content:newThingItemContent,
+          type:"thing",}
         );
+        if (!newItem) throw new Error("no new item");
         toast.success("Item added");
         setItems([...items, newItem]);
         formRef.current?.reset();
@@ -178,7 +185,7 @@ function AddMovieItem({
       setMovies([]);
       return;
     }
-    searchMovies(debouncedQuery).then((movies) => {
+    void searchMovies(debouncedQuery).then((movies) => {
       setMovies(movies);
       console.log(movies);
     });
@@ -208,20 +215,21 @@ function AddMovieItem({
           />
         </div>
         <div className="flex max-h-[60dvh] flex-col justify-center gap-4 overflow-auto">
-          {movies &&
-            movies.map((movie) => {
+          {movies?.map((movie) => {
               return (
                 <div
+                  key={movie.id}
                   onClick={async () => {
                     const movieContent: MovieContent = {
                       posterPath: movie.poster_path,
                       title: movie.title,
                     };
                     const newItem = await addListItem(
-                      list.id,
-                      movieContent,
-                      "movie",
+                      {listId:list.id,
+                      content:movieContent,
+                      type:"movie",}
                     );
+                    if (!newItem) throw new Error("no new item");
                     toast.success("Item added");
                     setItems([...items, newItem]);
                     setOpen(false);

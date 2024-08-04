@@ -13,6 +13,11 @@ import {
   type DragEndEvent,
   type DragOverEvent,
   DragOverlay,
+  MouseSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
 } from "@dnd-kit/core";
 import { ListItem } from "./ListItems";
 import { arrayMove } from "@dnd-kit/sortable";
@@ -29,12 +34,9 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
     setLists(listOrder.map((id) => listBoard.lists.find((l) => l.id === id)!));
   }, [listOrder, listBoard.lists]);
 
-
-  const onDragEnd = (result: DragEndEvent) => {
+  const onDragEnd = async (result: DragEndEvent) => {
     const { active, over } = result;
     setDraggedItem(null);
-    console.log("active", active);
-    console.log("over", over);
     if (!over) return;
     if (active.id == over.id) return;
     const activeData = active.data.current as {
@@ -48,7 +50,7 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
       item?: Item;
       list?: ListType;
       index: number;
-    }
+    };
     if (!activeData || !overData) return;
     const activeType = activeData.type;
     const overType = overData.type;
@@ -66,23 +68,14 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
               activeData.index,
               overData.index,
             );
-            void moveItems({
-              destinationListId: overListId,
-              item: activeItem,
-              newIndex: overData.index,
-              originListId: activeListId,
-              originalIndex: activeData.index,
-            });
           }
         });
       }
     }
   };
 
-  const onDragOver = (event: DragOverEvent) => {
+  const onDragOver = async (event: DragOverEvent) => {
     const { active, over } = event;
-    console.log("active", active);
-    console.log("over", over);
     if (!over) return;
     if (active.id == over.id) return;
     const activeData = active.data.current as {
@@ -96,7 +89,7 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
       item?: Item;
       list?: ListType;
       index: number;
-    }
+    };
     if (!activeData || !overData) return;
     const activeType = activeData.type;
     const overType = overData.type;
@@ -106,26 +99,17 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
       if (overList.items.length > 0) {
         return;
       }
-      console.log("moving to empty list");
       const overListId = overList.id;
 
       const activeListId = activeItem.listId;
       lists.forEach((list) => {
         if (list.id === overListId) {
-          console.log("adding to empty list");
           list.items = [...list.items, { ...activeItem, listId: overListId }];
         }
         if (list.id === activeListId) {
           list.items = list.items.filter((i) => i.id !== activeItem.id);
         }
       });
-      void moveItems({
-        item: activeItem,
-        originListId: activeListId,
-        destinationListId:overListId,
-        originalIndex:activeData.index,
-        newIndex:0
-      })
     } else if (activeType == "Item" && overType == "Item") {
       const activeItem = activeData.item!;
       const overItem = overData.item!;
@@ -146,13 +130,6 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
             ];
           }
         });
-        void moveItems({
-          item: activeItem,
-          originalIndex: activeData.index,
-          originListId,
-          destinationListId,
-          newIndex: overData.index
-        })
       }
     }
     setLists(lists);
@@ -170,12 +147,10 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
   //   moveLists(listBoard.id, newListOrder);
   // };
 
-
   const memoizedLists = useMemo(() => lists, [lists]);
   const memoizedListOrder = useMemo(() => listOrder, [listOrder]);
-
   const [draggedItem, setDraggedItem] = useState<Item | null>(null);
-
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
   return (
     <ListsContext.Provider
       value={{
@@ -188,6 +163,7 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
       }}
     >
       <DndContext
+        sensors={sensors}
         onDragOver={onDragOver}
         onDragStart={({ active }) => {
           if (!active.data.current) return;
@@ -222,9 +198,13 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
         </main>
         <DragOverlay>
           {draggedItem && (
-            <ListItem item={draggedItem} index={0} onDelete={() => {
-              return;
-            }} />
+            <ListItem
+              item={draggedItem}
+              index={0}
+              onDelete={() => {
+                return;
+              }}
+            />
           )}
         </DragOverlay>
       </DndContext>
