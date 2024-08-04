@@ -27,9 +27,14 @@ export function ListItem({
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
-
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: item.id, data: { type: "Item", item, index } });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id, data: { type: "Item", item, index } });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -41,7 +46,7 @@ export function ListItem({
       {...attributes}
       ref={setNodeRef}
       className={cn(
-        "group mb-2 flex h-full w-full items-center bg-muted touch-manipulation",
+        "group mb-2 flex h-full w-full touch-manipulation items-center bg-muted",
         isDragging && "border-2 border-primary bg-muted-foreground/10",
       )}
     >
@@ -90,7 +95,8 @@ function ListItemContent({
         <ListItemTVShow isDragging={isDragging} item={item as ThingItem} />
       );
     default:
-      return <div className="bg-red-500">{item.content.toString()}</div>;
+      console.log(item.content);
+      return <div className="bg-red-500">item content in console</div>;
   }
 }
 
