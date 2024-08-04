@@ -41,7 +41,7 @@ export function ListItem({
       {...attributes}
       ref={setNodeRef}
       className={cn(
-        "group mb-2 flex h-full w-full items-center bg-muted",
+        "group mb-2 flex h-full w-full items-center bg-muted touch-manipulation",
         isDragging && "border-2 border-primary bg-muted-foreground/10",
       )}
     >
