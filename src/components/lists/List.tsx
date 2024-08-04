@@ -69,7 +69,11 @@ export function List({ list, index }: { list: List; index: number }) {
     },
   });
   return (
-    <Card className={cn("h-fit min-w-[90dvw] md:min-w-64 md:max-w-xl snap-center")}>
+    <Card
+      className={cn(
+        "h-fit max-h-[90dvh] md:max-h-full min-w-[90dvw] snap-center md:min-w-64 md:max-w-xl",
+      )}
+    >
       <CardHeader className="flex flex-row items-center justify-between">
         <h2>{list.name}</h2>
         <DeleteListButton list={list} />
@@ -82,28 +86,30 @@ export function List({ list, index }: { list: List; index: number }) {
           ref={setNodeRef}
           className={cn("flex w-full flex-col justify-between")}
         >
-          <SortableContext
-            items={items.map((i) => i.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            {items.map((item, index) => (
-              <ListItem
-                key={item.id}
-                item={item}
-                index={index}
-                onDelete={() => {
-                  setItems(items.filter((i) => i.id !== item.id));
-                  lists.forEach((listFromState) => {
-                    if (listFromState.id == list.id) {
-                      listFromState.items.filter((i) => i.id != item.id);
-                    }
-                  });
-                  setLists(lists);
-                  void deleteListItem(item.id, list.id);
-                }}
-              />
-            ))}
-          </SortableContext>
+          <div className="overflow-y-auto md:overflow-y-visible max-h-[50dvh] md:max-h-full mb-2">
+            <SortableContext
+              items={items.map((i) => i.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {items.map((item, index) => (
+                <ListItem
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  onDelete={() => {
+                    setItems(items.filter((i) => i.id !== item.id));
+                    lists.forEach((listFromState) => {
+                      if (listFromState.id == list.id) {
+                        listFromState.items.filter((i) => i.id != item.id);
+                      }
+                    });
+                    setLists(lists);
+                    void deleteListItem(item.id, list.id);
+                  }}
+                />
+              ))}
+            </SortableContext>
+          </div>
           {list.type === "thing" && (
             <AddThingItem list={list} items={items} setItems={setItems} />
           )}
@@ -142,11 +148,11 @@ function AddThingItem({
         const newThingItemContent: ThingContent = {
           text,
         };
-        const newItem = await addListItem(
-        {  listId:list.id,
-          content:newThingItemContent,
-          type:"thing",}
-        );
+        const newItem = await addListItem({
+          listId: list.id,
+          content: newThingItemContent,
+          type: "thing",
+        });
         if (!newItem) throw new Error("no new item");
         toast.success("Item added");
         setItems([...items, newItem]);
@@ -216,46 +222,46 @@ function AddMovieItem({
         </div>
         <div className="flex max-h-[60dvh] flex-col justify-center gap-4 overflow-auto">
           {movies?.map((movie) => {
-              return (
-                <div
-                  key={movie.id}
-                  onClick={async () => {
-                    const movieContent: MovieContent = {
-                      posterPath: movie.poster_path,
-                      title: movie.title,
-                    };
-                    const newItem = await addListItem(
-                      {listId:list.id,
-                      content:movieContent,
-                      type:"movie",}
-                    );
-                    if (!newItem) throw new Error("no new item");
-                    toast.success("Item added");
-                    setItems([...items, newItem]);
-                    setOpen(false);
-                  }}
-                  className="relative flex h-full w-full cursor-pointer flex-row items-center justify-between rounded-lg p-3 transition duration-150 hover:bg-muted"
-                >
-                  <div className="flex flex-col items-center justify-start p-4">
-                    <div className="flex w-full flex-row items-center justify-between gap-2">
-                      <p className="text-left text-base font-bold text-primary">
-                        {movie.title}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {movie.release_date}
-                      </p>
-                    </div>
-                    <p className="text-left text-sm text-muted-foreground">
-                      {movie.overview.substring(0, 100)}...
+            return (
+              <div
+                key={movie.id}
+                onClick={async () => {
+                  const movieContent: MovieContent = {
+                    posterPath: movie.poster_path,
+                    title: movie.title,
+                  };
+                  const newItem = await addListItem({
+                    listId: list.id,
+                    content: movieContent,
+                    type: "movie",
+                  });
+                  if (!newItem) throw new Error("no new item");
+                  toast.success("Item added");
+                  setItems([...items, newItem]);
+                  setOpen(false);
+                }}
+                className="relative flex h-full w-full cursor-pointer flex-row items-center justify-between rounded-lg p-3 transition duration-150 hover:bg-muted"
+              >
+                <div className="flex flex-col items-center justify-start p-4">
+                  <div className="flex w-full flex-row items-center justify-between gap-2">
+                    <p className="text-left text-base font-bold text-primary">
+                      {movie.title}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {movie.release_date}
                     </p>
                   </div>
-                  <img
-                    className="w-24"
-                    src={`https://image.tmdb.org/t/p/original/${movie.poster_path}`}
-                  />
+                  <p className="text-left text-sm text-muted-foreground">
+                    {movie.overview.substring(0, 100)}...
+                  </p>
                 </div>
-              );
-            })}
+                <img
+                  className="w-24"
+                  src={`https://image.tmdb.org/t/p/original/${movie.poster_path}`}
+                />
+              </div>
+            );
+          })}
         </div>
       </DialogContent>
     </Dialog>
