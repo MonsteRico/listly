@@ -150,7 +150,7 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
   const memoizedLists = useMemo(() => lists, [lists]);
   const memoizedListOrder = useMemo(() => listOrder, [listOrder]);
   const [draggedItem, setDraggedItem] = useState<Item | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
+  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
   return (
     <ListsContext.Provider
       value={{
