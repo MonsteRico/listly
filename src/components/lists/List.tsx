@@ -69,7 +69,7 @@ export function List({ list, index }: { list: List; index: number }) {
     },
   });
   return (
-    <Card className={cn("h-fit min-w-[90dvw] md:min-w-64 md:max-w-xl")}>
+    <Card className={cn("h-fit min-w-[90dvw] md:min-w-64 md:max-w-xl snap-center")}>
       <CardHeader className="flex flex-row items-center justify-between">
         <h2>{list.name}</h2>
         <DeleteListButton list={list} />
