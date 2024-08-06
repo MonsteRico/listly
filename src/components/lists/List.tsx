@@ -7,10 +7,10 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import type {
-  List,
   Item,
   ThingContent,
   MovieContent,
+  List,
 } from "@/server/db/schema";
 import { Dot, Plus, Search, Star } from "lucide-react";
 import { use, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -26,14 +26,6 @@ import { DeleteListButton } from "./DeleteListButton";
 import { Movie } from "tmdb-ts";
 import { useDebounce } from "@uidotdev/usehooks";
 import { searchMovies } from "@/server/actions/movies/searchMovies";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
 import { Label } from "../ui/label";
 import { ListsContext } from "./ListsContext";
 import invariant from "tiny-invariant";
@@ -45,6 +37,22 @@ import {
 import { useDroppable } from "@dnd-kit/core";
 import { set } from "zod";
 import { setListItems } from "@/server/actions/lists/setListItems";
+import {
+  DrawerDialog,
+  DrawerDialogContent,
+  DrawerDialogDescription,
+  DrawerDialogFooter,
+  DrawerDialogHeader,
+  DrawerDialogTitle,
+  DrawerDialogTrigger,
+} from "../ui/modal-drawer";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 export function List({ list, index }: { list: List; index: number }) {
   const [parent, enableAnimations] = useAutoAnimate();
@@ -68,16 +76,23 @@ export function List({ list, index }: { list: List; index: number }) {
       list,
     },
   });
+
+  const [open, setOpen] = useState(false);
+
   return (
     <Card
       className={cn(
-        "h-fit max-h-[90dvh] md:max-h-full min-w-[90dvw] snap-center md:min-w-64 md:max-w-xl",
+        "h-fit max-h-[90dvh] min-w-[90dvw] snap-center md:max-h-full md:min-w-64 md:max-w-xl",
       )}
     >
-      <CardHeader className="flex flex-row items-center justify-between">
-        <h2>{list.name}</h2>
-        <DeleteListButton list={list} />
-      </CardHeader>
+      <DrawerDialog open={open} onOpenChange={setOpen}>
+        <EditList list={list} />
+        <DrawerDialogTrigger asChild>
+          <CardHeader className="flex flex-row items-center justify-between border-b-2 border-accent">
+            <h2>{list.name}</h2>
+          </CardHeader>
+        </DrawerDialogTrigger>
+      </DrawerDialog>
       <div
         className={cn("flex flex-col gap-2 py-2 transition duration-150")}
         ref={parent}
@@ -86,7 +101,7 @@ export function List({ list, index }: { list: List; index: number }) {
           ref={setNodeRef}
           className={cn("flex w-full flex-col justify-between")}
         >
-          <div className="overflow-y-auto md:overflow-y-visible max-h-[50dvh] md:max-h-full mb-2">
+          <div className="mb-2 max-h-[50dvh] overflow-y-auto md:max-h-full md:overflow-y-visible">
             <SortableContext
               items={items.map((i) => i.id)}
               strategy={verticalListSortingStrategy}
@@ -198,19 +213,19 @@ function AddMovieItem({
   }, [debouncedQuery]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <DrawerDialog open={open} onOpenChange={setOpen}>
+      <DrawerDialogTrigger asChild>
         <Button
           className="flex w-full flex-row rounded-lg border-2 border-dashed focus-within:border-solid"
           variant="ghost"
         >
           Add a Movie
         </Button>
-      </DialogTrigger>
-      <DialogContent className="">
-        <DialogHeader>
-          <DialogTitle>Add a Movie</DialogTitle>
-        </DialogHeader>
+      </DrawerDialogTrigger>
+      <DrawerDialogContent>
+        <DrawerDialogHeader>
+          <DrawerDialogTitle>Add a Movie</DrawerDialogTitle>
+        </DrawerDialogHeader>
         <div className="items-center gap-4">
           <Input
             className=""
@@ -263,7 +278,58 @@ function AddMovieItem({
             );
           })}
         </div>
-      </DialogContent>
-    </Dialog>
+      </DrawerDialogContent>
+    </DrawerDialog>
+  );
+}
+
+function EditList({ list }: { list: List }) {
+  const [listName, setListName] = useState(list.name ?? "");
+  const [listType, setListType] = useState(list.type);
+  return (
+    <DrawerDialogContent>
+      <DrawerDialogHeader>
+        <DrawerDialogTitle>Edit List</DrawerDialogTitle>
+        <DrawerDialogDescription>{list.id}</DrawerDialogDescription>
+      </DrawerDialogHeader>
+      <div>
+        <Label>Name</Label>
+        <Input
+          className="w-full"
+          defaultValue={listName}
+          onChange={(e) => {
+            setListName(e.target.value);
+          }}
+        />
+      </div>
+      <div>
+        <Label>Accent Color</Label>
+        {/* <ColorPicker
+          className="w-full"
+          color={list.accentColor}
+          onChange={(color) => {
+            setListName(color);
+          }}
+        /> */}
+      </div>
+      <div>
+        <Label>Item Type</Label>
+        <Select>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Thing" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="thing">Thing</SelectItem>
+            <SelectItem value="movie">Movie</SelectItem>
+            <SelectItem value="tv">TV Show</SelectItem>
+            <SelectItem value="book">Book</SelectItem>
+            <SelectItem value="game">Game</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <DrawerDialogFooter>
+        <DeleteListButton list={list} />
+      </DrawerDialogFooter>
+    </DrawerDialogContent>
   );
 }
