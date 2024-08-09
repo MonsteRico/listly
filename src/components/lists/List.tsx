@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,35 +6,24 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import type {
-  Item,
-  ThingContent,
-  MovieContent,
   List,
+  ListTypes,
 } from "@/server/db/schema";
-import { Dot, Plus, Search, Star } from "lucide-react";
-import { use, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
-import { addListItem } from "@/server/actions/lists/addListItem";
+import { useContext, useEffect, useRef, useState } from "react";
 import { ListItem } from "./ListItems";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { deleteListItem } from "@/server/actions/lists/deleteListItem";
 import { cn } from "@/lib/utils";
 import { Input } from "../ui/input";
 import { DeleteListButton } from "./DeleteListButton";
-import { Movie } from "tmdb-ts";
 import { useDebounce } from "@uidotdev/usehooks";
-import { searchMovies } from "@/server/actions/movies/searchMovies";
 import { Label } from "../ui/label";
 import { ListsContext } from "./ListsContext";
-import invariant from "tiny-invariant";
-import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
-import { set } from "zod";
 import { setListItems } from "@/server/actions/lists/setListItems";
 import {
   DrawerDialog,
@@ -53,6 +41,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { CirclePicker } from "react-color";
+import { updateList } from "@/server/actions/lists/updateList";
+import { AddMovieItem } from "./addItemButtons/AddMovie";
+import { AddThingItem } from "./addItemButtons/AddThing";
+import { Button } from "../ui/button";
 
 export function List({ list, index }: { list: List; index: number }) {
   const [parent, enableAnimations] = useAutoAnimate();
@@ -88,8 +81,13 @@ export function List({ list, index }: { list: List; index: number }) {
       <DrawerDialog open={open} onOpenChange={setOpen}>
         <EditList list={list} />
         <DrawerDialogTrigger asChild>
-          <CardHeader className="flex flex-row items-center justify-between border-b-2 border-accent">
-            <h2>{list.name}</h2>
+          <CardHeader
+            style={{
+              backgroundColor: list.accentColor,
+            }}
+            className="flex flex-row items-center justify-between hover:cursor-pointer rounded-t-lg border-b-2  border-accent"
+          >
+            <h2 className="text-xl font-bold text-primary">{list.name}</h2>
           </CardHeader>
         </DrawerDialogTrigger>
       </DrawerDialog>
@@ -99,7 +97,7 @@ export function List({ list, index }: { list: List; index: number }) {
       >
         <CardContent
           ref={setNodeRef}
-          className={cn("flex w-full flex-col justify-between")}
+          className={cn("flex w-full flex-col justify-between rounded-b-lg")}
         >
           <div className="mb-2 max-h-[50dvh] overflow-y-auto md:max-h-full md:overflow-y-visible">
             <SortableContext
@@ -133,159 +131,31 @@ export function List({ list, index }: { list: List; index: number }) {
           )}
         </CardContent>
       </div>
-      <CardFooter></CardFooter>
+      <CardFooter className="flex flex-col rounded-b-lg"></CardFooter>
     </Card>
   );
 }
 
-function AddThingItem({
-  list,
-  setItems,
-  items,
-}: {
-  list: List;
-  setItems: React.Dispatch<React.SetStateAction<Item[]>>;
-  items: Item[];
-}) {
-  const formRef = useRef<HTMLFormElement>(null);
-  return (
-    <form
-      className="flex flex-row rounded-lg border-2 border-dashed focus-within:border-solid"
-      ref={formRef}
-      action={async (formData) => {
-        const { text } = Object.fromEntries(formData.entries()) as {
-          text: string;
-        };
-        if (!text || text.length === 0) {
-          toast.error("Content cannot be empty");
-          return;
-        }
-        const newThingItemContent: ThingContent = {
-          text,
-        };
-        const newItem = await addListItem({
-          listId: list.id,
-          content: newThingItemContent,
-          type: "thing",
-        });
-        if (!newItem) throw new Error("no new item");
-        toast.success("Item added");
-        setItems([...items, newItem]);
-        formRef.current?.reset();
-      }}
-    >
-      <Input
-        type="text"
-        className="px-4 focus:outline-none"
-        name="text"
-        placeholder="New Item"
-      />
-      <Button type="submit" variant="ghost" className="text-muted-foreground">
-        <Plus />
-      </Button>
-    </form>
-  );
-}
 
-function AddMovieItem({
-  list,
-  setItems,
-  items,
-}: {
-  list: List;
-  setItems: React.Dispatch<React.SetStateAction<Item[]>>;
-  items: Item[];
-}) {
-  const formRef = useRef<HTMLFormElement>(null);
-  const [query, setQuery] = useState("");
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const debouncedQuery = useDebounce(query, 500);
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    if (debouncedQuery.length === 0) {
-      setMovies([]);
-      return;
-    }
-    void searchMovies(debouncedQuery).then((movies) => {
-      setMovies(movies);
-      console.log(movies);
-    });
-  }, [debouncedQuery]);
 
-  return (
-    <DrawerDialog open={open} onOpenChange={setOpen}>
-      <DrawerDialogTrigger asChild>
-        <Button
-          className="flex w-full flex-row rounded-lg border-2 border-dashed focus-within:border-solid"
-          variant="ghost"
-        >
-          Add a Movie
-        </Button>
-      </DrawerDialogTrigger>
-      <DrawerDialogContent>
-        <DrawerDialogHeader>
-          <DrawerDialogTitle>Add a Movie</DrawerDialogTitle>
-        </DrawerDialogHeader>
-        <div className="items-center gap-4">
-          <Input
-            className=""
-            placeholder="Search for a movie"
-            onChange={(e) => {
-              setQuery(e.target.value);
-            }}
-          />
-        </div>
-        <div className="flex max-h-[60dvh] flex-col justify-center gap-4 overflow-auto">
-          {movies?.map((movie) => {
-            return (
-              <div
-                key={movie.id}
-                onClick={async () => {
-                  const movieContent: MovieContent = {
-                    posterPath: movie.poster_path,
-                    title: movie.title,
-                  };
-                  const newItem = await addListItem({
-                    listId: list.id,
-                    content: movieContent,
-                    type: "movie",
-                  });
-                  if (!newItem) throw new Error("no new item");
-                  toast.success("Item added");
-                  setItems([...items, newItem]);
-                  setOpen(false);
-                }}
-                className="relative flex h-full w-full cursor-pointer flex-row items-center justify-between rounded-lg p-3 transition duration-150 hover:bg-muted"
-              >
-                <div className="flex flex-col items-center justify-start p-4">
-                  <div className="flex w-full flex-row items-center justify-between gap-2">
-                    <p className="text-left text-base font-bold text-primary">
-                      {movie.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {movie.release_date}
-                    </p>
-                  </div>
-                  <p className="text-left text-sm text-muted-foreground">
-                    {movie.overview.substring(0, 100)}...
-                  </p>
-                </div>
-                <img
-                  className="w-24"
-                  src={`https://image.tmdb.org/t/p/original/${movie.poster_path}`}
-                />
-              </div>
-            );
-          })}
-        </div>
-      </DrawerDialogContent>
-    </DrawerDialog>
-  );
-}
 
 function EditList({ list }: { list: List }) {
   const [listName, setListName] = useState(list.name ?? "");
   const [listType, setListType] = useState(list.type);
+  const [accentColor, setAccentColor] = useState(list.accentColor);
+  const debouncedListName = useDebounce(listName, 500);
+  const debouncedListType = useDebounce(listType, 500);
+  const debouncedAccentColor = useDebounce(accentColor, 500);
+
+  useEffect(() => {
+    void updateList({
+      listId: list.id,
+      name: debouncedListName,
+      type: debouncedListType,
+      accentColor: debouncedAccentColor,
+    });
+  }, [debouncedListName, debouncedListType, debouncedAccentColor]);
+
   return (
     <DrawerDialogContent>
       <DrawerDialogHeader>
@@ -304,19 +174,25 @@ function EditList({ list }: { list: List }) {
       </div>
       <div>
         <Label>Accent Color</Label>
-        {/* <ColorPicker
-          className="w-full"
-          color={list.accentColor}
-          onChange={(color) => {
-            setListName(color);
+        <CirclePicker
+          color={accentColor}
+          onChangeComplete={(color) => {
+            setAccentColor(color.hex);
           }}
-        /> */}
+        />
+        <Button className="mt-4" onClick={() => {setAccentColor("#ffffff")}}>Reset to White</Button>
       </div>
       <div>
         <Label>Item Type</Label>
-        <Select>
+        <Select
+          defaultValue={list.type}
+          value={listType}
+          onValueChange={(value) => {
+            setListType(value as ListTypes);
+          }}
+        >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Thing" />
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="thing">Thing</SelectItem>

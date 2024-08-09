@@ -135,6 +135,7 @@ export const lists = createTable("lists", {
     .notNull(),
   updatedAt: timestamp("updatedAt", { withTimezone: true }),
   type: listTypes("type").notNull().default("thing"),
+  accentColor: varchar("accent_color", { length: 255 }).notNull().default("#ffffff"),
 });
 
 export const listsRelations = relations(lists, ({ one }) => ({
@@ -157,6 +158,7 @@ export const usersToBoards = createTable("users_to_boards", {
 export type CreateList = { name: string; boardId: string;};
 export type CreateListBoard = { name: string };
 export type List = typeof lists.$inferSelect;
+export type ListTypes = "thing" | "movie" | "game" | "book" | "tv_show";
 export type ListBoard = typeof listBoards.$inferSelect & { lists: List[] };
 
 export type ItemTypes = "thing" | "movie" | "game" | "book" | "tv_show";
