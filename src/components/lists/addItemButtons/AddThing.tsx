@@ -27,7 +27,7 @@ export function AddThingDialog({
   const { data: session } = useSession();
   const formRef = useRef<HTMLFormElement>(null);
   return (
-    <DrawerDialogContent>
+    <DrawerDialogContent className="min-h-[80dvh]">
       <DrawerDialogHeader>
         <DrawerDialogTitle>Add a Thing</DrawerDialogTitle>
       </DrawerDialogHeader>

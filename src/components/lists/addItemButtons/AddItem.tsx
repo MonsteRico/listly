@@ -54,7 +54,7 @@ export function AddItem({
             Add Item
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
+        <DropdownMenuContent >
           <DropdownMenuItem
             onClick={() => {
               setOpenThingAdd(true);

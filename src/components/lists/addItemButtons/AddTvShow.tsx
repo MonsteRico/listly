@@ -45,7 +45,7 @@ export function AddTvShowDialog({
   const { data: session } = useSession();
 
   return (
-    <DrawerDialogContent>
+    <DrawerDialogContent className="min-h-[80dvh]">
       <DrawerDialogHeader>
         <DrawerDialogTitle>Add a Movie</DrawerDialogTitle>
       </DrawerDialogHeader>

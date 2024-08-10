@@ -18,6 +18,7 @@ import {
 } from "./dialog";
 import type { DialogTriggerProps } from "@radix-ui/react-dialog";
 import { useMediaQuery } from "@/lib/useMediaQuery";
+import { cn } from "@/lib/utils";
 
 export function DrawerDialog({
   open,
@@ -162,14 +163,16 @@ export function DrawerDialogDescription({
 
 export function DrawerDialogContent({
   children,
+  className,
 }: {
   children: React.ReactNode;
+  className?: string;
 }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   if (isDesktop) {
-    return <DialogContent>{children}</DialogContent>;
+    return <DialogContent className={className}>{children}</DialogContent>;
   }
 
-  return <DrawerContent className="p-5">{children}</DrawerContent>;
+  return <DrawerContent className={cn("p-5 pb-16", className)}>{children}</DrawerContent>;
 }
