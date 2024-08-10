@@ -31,7 +31,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-sans ${inter.variable} m-5 bg-slate-300`}>
+      <body className={`font-sans ${inter.variable} m-5 bg-slate-300 dark:bg-slate-800`}>
         <Providers>
           <TopNav />
           {children}

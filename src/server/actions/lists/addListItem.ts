@@ -11,18 +11,21 @@ import {
 } from "../../db/schema";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
+import { User } from "next-auth";
 
 export async function addListItem({
   listId,
   item,
   content,
   type,
+  createdByUserId,
 }: {
   listId: string;
   item?: Item;
   content?: ContentTypes;
   type: ItemTypes;
-}) : Promise<Item | undefined> {
+  createdByUserId: string;
+}): Promise<Item | undefined> {
   if (item && content) throw new Error("Cannot add both item and content");
   if (!item && !content) throw new Error("Must add either item or content");
   const [list] = await db.select().from(lists).where(eq(lists.id, listId));
@@ -36,9 +39,9 @@ export async function addListItem({
       type,
       content,
       createdAt: new Date().toISOString(),
-      createdByUserId: "",
+      createdByUserId,
       updatedAt: new Date().toISOString(),
-      updatedByUserId: "",
+      updatedByUserId: createdByUserId,
     };
 
     await db
@@ -50,8 +53,7 @@ export async function addListItem({
     revalidatePath(`/${list.boardId}`);
 
     return newItem;
-  }
-  else if (item) {
+  } else if (item) {
     await db
       .update(lists)
       .set({
@@ -61,5 +63,4 @@ export async function addListItem({
     revalidatePath(`/${list.boardId}`);
     return item;
   }
-
 }

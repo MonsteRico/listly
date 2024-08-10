@@ -25,6 +25,7 @@ import { AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `listly_${name}`);
 
+export const colorSchemes = pgEnum("color_schemes", ["system", "light", "dark"]);
 
 export const users = createTable("user", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
@@ -35,6 +36,7 @@ export const users = createTable("user", {
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
   image: varchar("image", { length: 255 }),
+  colorScheme: colorSchemes("color_scheme").notNull().default("system"),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({

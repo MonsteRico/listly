@@ -83,7 +83,7 @@ export function List({ list, index }: { list: List; index: number }) {
         <DrawerDialogTrigger asChild>
           <CardHeader
             style={{
-              backgroundColor: list.accentColor,
+              backgroundColor: list.accentColor != "#ffffff" ? list.accentColor : "transparent",
             }}
             className="flex flex-row items-center justify-between hover:cursor-pointer rounded-t-lg border-b-2  border-accent"
           >
@@ -162,9 +162,10 @@ function EditList({ list }: { list: List }) {
         <DrawerDialogTitle>Edit List</DrawerDialogTitle>
         <DrawerDialogDescription>{list.id}</DrawerDialogDescription>
       </DrawerDialogHeader>
-      <div>
+      <div className="flex flex-col gap-4">
         <Label>Name</Label>
         <Input
+          name="listName"
           className="w-full"
           defaultValue={listName}
           onChange={(e) => {
@@ -172,7 +173,7 @@ function EditList({ list }: { list: List }) {
           }}
         />
       </div>
-      <div>
+      <div className="flex flex-col gap-4">
         <Label>Accent Color</Label>
         <CirclePicker
           color={accentColor}
@@ -180,9 +181,9 @@ function EditList({ list }: { list: List }) {
             setAccentColor(color.hex);
           }}
         />
-        <Button className="mt-4" onClick={() => {setAccentColor("#ffffff")}}>Reset to White</Button>
+        <Button className="mt-4" onClick={() => {setAccentColor("#ffffff")}}>Reset Color to None</Button>
       </div>
-      <div>
+      <div className="flex flex-col gap-4">
         <Label>Item Type</Label>
         <Select
           defaultValue={list.type}

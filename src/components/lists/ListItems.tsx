@@ -1,8 +1,13 @@
-import type { Item, MovieItem, ThingItem } from "@/server/db/schema";
+import type {
+  Item,
+  MovieItem,
+  ThingContent,
+  ThingItem,
+} from "@/server/db/schema";
 import { Card } from "../ui/card";
 import { Draggable } from "@hello-pangea/dnd";
 import { Button } from "../ui/button";
-import { X } from "lucide-react";
+import { Pencil, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -16,6 +21,16 @@ import invariant from "tiny-invariant";
 import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useSession } from "next-auth/react";
+import {
+  DrawerDialog,
+  DrawerDialogContent,
+  DrawerDialogHeader,
+  DrawerDialogTitle,
+  DrawerDialogTrigger,
+} from "../ui/modal-drawer";
+import { Drawer } from "vaul";
+import { Input } from "../ui/input";
 export function ListItem({
   item,
   index,
@@ -39,6 +54,7 @@ export function ListItem({
     transform: CSS.Transform.toString(transform),
     transition,
   };
+  const [open, setOpen] = useState(false);
 
   return (
     <Card
@@ -56,6 +72,40 @@ export function ListItem({
       >
         <ListItemContent isDragging={false} item={item} />
       </div>
+      {item.type == "thing" && (
+        <DrawerDialog open={open} onOpenChange={setOpen}>
+          <DrawerDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              className={cn(
+                "h-full w-1/4 text-muted-foreground opacity-0 hover:bg-muted-foreground/10 group-hover:opacity-100",
+                isDragging && "hidden",
+              )}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setOpen(true);
+              }}
+            >
+              <Pencil />
+            </Button>
+          </DrawerDialogTrigger>
+          <DrawerDialogContent>
+            <DrawerDialogHeader>
+              <DrawerDialogTitle>Edit Item</DrawerDialogTitle>
+            </DrawerDialogHeader>
+            <div>
+              <Input
+                className="w-full"
+                defaultValue={(item.content as ThingContent).text}
+                onChange={(e) => {
+                  (item.content as ThingContent).text = e.target.value;
+                }}
+              />
+            </div>
+          </DrawerDialogContent>
+        </DrawerDialog>
+      )}
       <Button
         variant="ghost"
         className={cn(

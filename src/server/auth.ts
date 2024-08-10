@@ -10,7 +10,7 @@ import GoogleProvider from "next-auth/providers/google";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { createTable, usersToBoards } from "@/server/db/schema";
+import { createTable, users, usersToBoards } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
 /**
@@ -47,12 +47,19 @@ export const authOptions: NextAuthOptions = {
       const listBoardIds = await db.query.usersToBoards.findMany({
         where: eq(usersToBoards.userId, userId),
       });
+      const dbUser = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+      });
+      if (!dbUser) {
+        throw new Error("User not found");
+      }
       return {
         ...session,
         user: {
           ...session.user,
           id: user.id,
           listBoardIds: listBoardIds.map((lb) => lb.boardId),
+          colorScheme: dbUser.colorScheme,
         },
       };
     },

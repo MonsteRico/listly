@@ -2,6 +2,7 @@ import getUser from "@/lib/getUser";
 import { NotebookTabs } from "lucide-react";
 import { LogoutButton } from "./LogoutButton";
 import { LoginButton } from "./LoginButton";
+import { Profile } from "./Profile";
 
 export async function TopNav() {
   const user = await getUser();
@@ -15,7 +16,7 @@ export async function TopNav() {
       <div className="flex flex-row gap-2">
         {user ? (
           <div className="flex flex-col items-center gap-2">
-            <LogoutButton />
+            <Profile user={user} />
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">

@@ -33,7 +33,5 @@ export async function createList({ name, boardId }: CreateList): Promise<List> {
     throw new Error("Failed to create list");
   }
 
-  revalidatePath(`/${boardId}`);
-
   return newList;
 }

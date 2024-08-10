@@ -30,9 +30,6 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
     listOrder.map((id) => listBoard.lists.find((l) => l.id === id)!),
   );
 
-  useEffect(() => {
-    setLists(listOrder.map((id) => listBoard.lists.find((l) => l.id === id)!));
-  }, [listOrder, listBoard.lists]);
 
   const onDragEnd = async (result: DragEndEvent) => {
     const { active, over } = result;
@@ -192,8 +189,6 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
             ))}
             <CreateList
               boardId={listBoard.id}
-              listsState={memoizedLists}
-              setListsState={setLists}
             />
           </div>
         </main>

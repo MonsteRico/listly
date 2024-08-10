@@ -25,12 +25,13 @@ export function DeleteListButton({ list }: { list: List }) {
     <AlertDialog onOpenChange={setDeleteDialogOpen} open={deleteDialogOpen}>
       <AlertDialogTrigger onClick={(e) => e.stopPropagation()} asChild>
         <Button
+          className="text-destructive-foreground gap-4 items-center"
           onClick={(e) => {
             e.stopPropagation();
           }}
-          variant={"ghost"}
+          variant={"destructive"}
         >
-          <Trash className="h-5 w-5 text-red-500" />
+          Delete <Trash className="h-5 w-5 text-destructive-foreground" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent onClick={(e) => e.stopPropagation()}>

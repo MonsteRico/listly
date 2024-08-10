@@ -19,6 +19,7 @@ import {
   DrawerDialogTitle,
   DrawerDialogTrigger,
 } from "@/components/ui/modal-drawer";
+import { useSession } from "next-auth/react";
 
 export function AddMovieItem({
   list,
@@ -44,6 +45,8 @@ export function AddMovieItem({
       console.log(movies);
     });
   }, [debouncedQuery]);
+
+  const { data: session } = useSession();
 
   return (
     <DrawerDialog open={open} onOpenChange={setOpen}>
@@ -74,6 +77,7 @@ export function AddMovieItem({
               <div
                 key={movie.id}
                 onClick={async () => {
+                  if (!session) return;
                   const movieContent: MovieContent = {
                     posterPath: movie.poster_path,
                     title: movie.title,
@@ -82,6 +86,7 @@ export function AddMovieItem({
                     listId: list.id,
                     content: movieContent,
                     type: "movie",
+                    createdByUserId: session.user.id,
                   });
                   if (!newItem) throw new Error("no new item");
                   toast.success("Item added");

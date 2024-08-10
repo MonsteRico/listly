@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { addListItem } from "@/server/actions/lists/addListItem";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export function AddThingItem({
   list,
@@ -16,6 +17,7 @@ export function AddThingItem({
   setItems: React.Dispatch<React.SetStateAction<Item[]>>;
   items: Item[];
 }) {
+  const { data: session } = useSession();
   const formRef = useRef<HTMLFormElement>(null);
   return (
     <form
@@ -29,6 +31,7 @@ export function AddThingItem({
           toast.error("Content cannot be empty");
           return;
         }
+        if (!session) return;
         const newThingItemContent: ThingContent = {
           text,
         };
@@ -36,6 +39,7 @@ export function AddThingItem({
           listId: list.id,
           content: newThingItemContent,
           type: "thing",
+          createdByUserId: session.user.id,
         });
         if (!newItem) throw new Error("no new item");
         toast.success("Item added");
