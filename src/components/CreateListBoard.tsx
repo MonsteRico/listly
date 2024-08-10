@@ -10,7 +10,7 @@ import { Card, CardContent } from "./ui/card";
 export function CreateListBoard() {
   const formRef = useRef<HTMLFormElement>(null);
   return (
-    <Card className="flex flex-col items-center justify-center">
+    <Card className="flex flex-col items-center justify-center min-h-36">
       <CardContent className="flex flex-col items-center justify-center">
         <form
           className="flex flex-col items-center justify-center gap-2"
