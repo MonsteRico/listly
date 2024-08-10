@@ -47,18 +47,18 @@ export function AddTvShowDialog({
   return (
     <DrawerDialogContent className="min-h-[80dvh]">
       <DrawerDialogHeader>
-        <DrawerDialogTitle>Add a Movie</DrawerDialogTitle>
+        <DrawerDialogTitle>Add a TV Show</DrawerDialogTitle>
       </DrawerDialogHeader>
       <div className="items-center gap-4">
         <Input
           className=""
-          placeholder="Search for a movie"
+          placeholder="Search for a tv show"
           onChange={(e) => {
             setQuery(e.target.value);
           }}
         />
       </div>
-      <div className="flex max-h-[60dvh] flex-col justify-center gap-4 overflow-auto">
+      <div className="flex max-h-[60dvh] min-h-[60dvh] flex-col justify-center gap-4 overflow-auto pt-32">
         {tvShows?.map((show) => {
           return (
             <div

@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   description: "Share lists with your friends easily",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
   manifest: "/manifest.json",
+  
 };
 
 export const viewport: Viewport = {

@@ -58,7 +58,7 @@ export function AddMovieDialog({
           }}
         />
       </div>
-      <div className="flex max-h-[60dvh] flex-col justify-center gap-4 overflow-auto">
+      <div className="flex min-h-[60dvh] max-h-[60dvh] pt-32 flex-col justify-center gap-4 overflow-auto">
         {movies?.map((movie) => {
           return (
             <div
