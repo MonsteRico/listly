@@ -13,5 +13,5 @@
 ~~[ ] board wide accent color? board background color?~~ simpler color wise to not do
 [x] Good mobile experience (scroll snapping) (kinda done)
 ~~[ ] "Last updated by" on list items~~ not worth it honestly
-[ ] PWA? ~~Notifications?~~ An info page?
+[x] PWA? ~~Notifications?~~ An info page?
 [ ] add dialog for games/books (steam api?)
