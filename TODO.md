@@ -4,7 +4,7 @@
 [x] Adding items to lists, removing, updating etc
 [x] Drag and drop between lists
 [x] FIX BUILD ERROR b/c localStorage is not defined
-[ ] Drag and drop lists within a board
+[x] Drag and drop lists within a board
 [x] List settings for renaming and setting default type and deleting and maybe accent color
 [x] google oauth
 [x] User settings for dark/light mode and setting their nickname
@@ -13,5 +13,5 @@
 ~~[ ] board wide accent color? board background color?~~ simpler color wise to not do
 [x] Good mobile experience (scroll snapping) (kinda done)
 ~~[ ] "Last updated by" on list items~~ not worth it honestly
-[ ] PWA? Notifications? An info page?
+[ ] PWA? ~~Notifications?~~ An info page?
 [ ] add dialog for games/books (steam api?)

@@ -9,6 +9,8 @@ export const ListsContext = createContext<{
   setListOrder: React.Dispatch<React.SetStateAction<string[]>>;
   draggedItem: Item | null;
   setDraggedItem: React.Dispatch<React.SetStateAction<Item | null>>;
+  draggedList: List | null;
+  setDraggedList: React.Dispatch<React.SetStateAction<List | null>>;
 }>({
   lists: [],
   setLists: () => {return},
@@ -16,4 +18,6 @@ export const ListsContext = createContext<{
   setListOrder: () => {return},
   draggedItem: null,
   setDraggedItem: () => {return},
+  draggedList: null,
+  setDraggedList: () => {return},
 });

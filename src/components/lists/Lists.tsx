@@ -1,5 +1,5 @@
 "use client";
-import type { Item, List as ListType, ListBoard } from "@/server/db/schema";
+import type { Item, List as ListType, ListBoard, } from "@/server/db/schema";
 import { useEffect, useMemo, useState } from "react";
 import { CreateList } from "../CreateList";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -20,7 +20,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { ListItem } from "./ListItems";
-import { arrayMove } from "@dnd-kit/sortable";
+import { arrayMove, horizontalListSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 
 export function Lists({ listBoard }: { listBoard: ListBoard }) {
   const [parent, enableAnimations] = useAutoAnimate();
@@ -30,6 +30,9 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
     listOrder.map((id) => listBoard.lists.find((l) => l.id === id)!),
   );
 
+  useEffect(() => {
+    console.log(listOrder);
+  }, [listOrder]);
 
   const onDragEnd = async (result: DragEndEvent) => {
     const { active, over } = result;
@@ -68,6 +71,20 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
           }
         });
       }
+    }
+    if (activeType == "List" && overType == "List") {
+      const activeList = activeData.list!;
+      const overList = overData.list!;
+      if (activeList.id === overList.id) {
+        return;
+      }
+      const newListOrder = arrayMove(
+        listOrder,
+        activeData.index,
+        overData.index,
+      );
+      setListOrder(newListOrder);
+      moveLists(listBoard.id, newListOrder);
     }
   };
 
@@ -132,21 +149,10 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
     setLists(lists);
   };
 
-  // const dragList = (result: any) => {
-  //   const { destination, source, draggableId } = result;
-  //   if (!destination) {
-  //     return;
-  //   }
-  //   const newListOrder = [...listOrder];
-  //   newListOrder.splice(source.index, 1);
-  //   newListOrder.splice(destination.index, 0, draggableId);
-  //   setListOrder(newListOrder);
-  //   moveLists(listBoard.id, newListOrder);
-  // };
-
   const memoizedLists = useMemo(() => lists, [lists]);
   const memoizedListOrder = useMemo(() => listOrder, [listOrder]);
   const [draggedItem, setDraggedItem] = useState<Item | null>(null);
+  const [draggedList, setDraggedList] = useState<ListType | null>(null);
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
   return (
     <ListsContext.Provider
@@ -157,6 +163,8 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
         setListOrder,
         draggedItem,
         setDraggedItem,
+        draggedList,
+        setDraggedList,
       }}
     >
       <DndContext
@@ -166,6 +174,9 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
           if (!active.data.current) return;
           if (active.data.current.type == "Item") {
             setDraggedItem(active.data.current.item as Item);
+          }
+          if (active.data.current.type == "List") {
+            setDraggedList(active.data.current.list as ListType);
           }
         }}
         onDragEnd={onDragEnd}
@@ -180,13 +191,17 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
               !draggedItem && "snap-x snap-mandatory",
             )}
           >
-            {lists.map((list) => (
-              <List
-                key={list.id}
-                list={list}
-                index={memoizedListOrder.indexOf(list.id)}
-              />
-            ))}
+            <SortableContext items={memoizedListOrder} strategy={horizontalListSortingStrategy}>
+              {memoizedListOrder.map((listId,i) => {
+                const list = lists.find((l) => l.id === listId)!;
+                return (
+                <List
+                  key={list.id}
+                  list={list}
+                  index={i}
+                />
+              )})}
+            </SortableContext>
             <CreateList
               boardId={listBoard.id}
             />
@@ -200,6 +215,12 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
               onDelete={() => {
                 return;
               }}
+            />
+          )}
+          {draggedList && (
+            <List
+              list={draggedList}
+              index={0}
             />
           )}
         </DragOverlay>

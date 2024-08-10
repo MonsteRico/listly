@@ -18,6 +18,7 @@ import { Label } from "../ui/label";
 import { ListsContext } from "./ListsContext";
 import {
   SortableContext,
+  useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
@@ -42,7 +43,8 @@ import { CirclePicker } from "react-color";
 import { updateList } from "@/server/actions/lists/updateList";
 import { Button } from "../ui/button";
 import { AddItem } from "./addItemButtons/AddItem";
-
+import { Pencil } from "lucide-react";
+import { CSS } from "@dnd-kit/utilities";
 export function List({ list, index }: { list: List; index: number }) {
   const [parent, enableAnimations] = useAutoAnimate();
   const [items, setItems] = useState(list.items || []);
@@ -58,38 +60,51 @@ export function List({ list, index }: { list: List; index: number }) {
   }, [debouncedList, items]);
 
   const ref = useRef(null);
-  const { setNodeRef, isOver } = useDroppable({
-    id: list.id,
-    data: {
-      type: "List",
-      list,
-    },
-  });
 
   const [open, setOpen] = useState(false);
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: list.id, data: { type: "List", list, index } });
 
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
   return (
     <Card
+      style={style}
+      {...attributes}
+      ref={setNodeRef}
       className={cn(
         "h-fit max-h-[90dvh] min-w-[90dvw] snap-center md:max-h-full md:min-w-64 md:max-w-xl",
+        isDragging && "opacity-0"
       )}
     >
-      <DrawerDialog open={open} onOpenChange={setOpen}>
-        <EditList list={list} />
-        <DrawerDialogTrigger asChild>
-          <CardHeader
-            style={{
-              backgroundColor:
-                list.accentColor != "#ffffff"
-                  ? list.accentColor
-                  : "transparent",
-            }}
-            className="flex flex-row items-center justify-between rounded-t-lg border-b-2 border-accent  hover:cursor-pointer"
-          >
-            <h2 className="text-xl font-bold text-primary">{list.name}</h2>
-          </CardHeader>
-        </DrawerDialogTrigger>
-      </DrawerDialog>
+      <div
+        style={{
+          backgroundColor:
+            list.accentColor != "#ffffff" ? list.accentColor : "transparent",
+        }}
+        className="group flex h-full flex-row items-center justify-between rounded-t-lg border-b-2 border-accent hover:cursor-pointer"
+      >
+        <div
+          className="flex h-full w-full flex-row items-center"
+          {...listeners}
+        >
+          <h2 className="text-xl font-bold text-primary pl-4">{list.name}</h2>
+        </div>
+        <DrawerDialog open={open} onOpenChange={setOpen}>
+          <EditList list={list} />
+          <DrawerDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              className="w-1/4 opacity-0 group-hover:opacity-100"
+            >
+              <Pencil />
+            </Button>
+          </DrawerDialogTrigger>
+        </DrawerDialog>
+      </div>
+
       <div
         className={cn("flex flex-col gap-2 py-2 transition duration-150")}
         ref={parent}
