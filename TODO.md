@@ -8,9 +8,10 @@
 [x] List settings for renaming and setting default type and deleting and maybe accent color
 [x] google oauth
 [x] User settings for dark/light mode and setting their nickname
-[ ] Add buttons for different types of items (movies, games, books, tv shows)
+[x] Add buttons for different types of items (movies, games, books, tv shows)
 [ ] Board settings for renaming
 ~~[ ] board wide accent color? board background color?~~ simpler color wise to not do
 [x] Good mobile experience (scroll snapping) (kinda done)
 ~~[ ] "Last updated by" on list items~~ not worth it honestly
 [ ] PWA? Notifications? An info page?
+[ ] add dialog for games/books (steam api?)

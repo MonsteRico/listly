@@ -8,12 +8,10 @@ import { revalidatePath } from "next/cache";
 export async function updateList({
   listId,
   name,
-  type,
   accentColor,
 }: {
   listId: string;
   name?: string;
-  type?: ListTypes;
   accentColor?: string;
 }) : Promise<void> {
   const [list] = await db.select().from(lists).where(eq(lists.id, listId));
@@ -21,11 +19,6 @@ export async function updateList({
   if (name) {
     await db.update(lists).set({
       name,
-    }).where(eq(lists.id, listId));
-  }
-  if (type) {
-    await db.update(lists).set({
-      type,
     }).where(eq(lists.id, listId));
   }
   if (accentColor) {

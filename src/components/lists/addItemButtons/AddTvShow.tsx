@@ -1,11 +1,11 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import type { Item, MovieContent, List } from "@/server/db/schema";
+import type { Item, MovieContent, List, TvShowContent } from "@/server/db/schema";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { addListItem } from "@/server/actions/lists/addListItem";
 import { Input } from "@/components/ui/input";
-import { Movie } from "tmdb-ts";
+import { Movie, TV } from "tmdb-ts";
 import { useDebounce } from "@uidotdev/usehooks";
 import { searchMovies } from "@/server/actions/apis/searchMovies";
 import {
@@ -16,8 +16,9 @@ import {
   DrawerDialogTrigger,
 } from "@/components/ui/modal-drawer";
 import { useSession } from "next-auth/react";
+import { searchTvShows } from "@/server/actions/apis/searchTv";
 
-export function AddMovieDialog({
+export function AddTvShowDialog({
   list,
   setItems,
   items,
@@ -29,16 +30,15 @@ export function AddMovieDialog({
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [query, setQuery] = useState("");
-  const [movies, setMovies] = useState<Movie[]>([]);
+  const [tvShows, setTvShows] = useState<TV[]>([]);
   const debouncedQuery = useDebounce(query, 500);
   useEffect(() => {
     if (debouncedQuery.length === 0) {
-      setMovies([]);
+      setTvShows([]);
       return;
     }
-    void searchMovies(debouncedQuery).then((movies) => {
-      setMovies(movies);
-      console.log(movies);
+    void searchTvShows(debouncedQuery).then((tvShows) => {
+      setTvShows(tvShows);
     });
   }, [debouncedQuery]);
 
@@ -59,20 +59,20 @@ export function AddMovieDialog({
         />
       </div>
       <div className="flex max-h-[60dvh] flex-col justify-center gap-4 overflow-auto">
-        {movies?.map((movie) => {
+        {tvShows?.map((show) => {
           return (
             <div
-              key={movie.id}
+              key={show.id}
               onClick={async () => {
                 if (!session) return;
-                const movieContent: MovieContent = {
-                  posterPath: movie.poster_path,
-                  title: movie.title,
+                const showContent: TvShowContent = {
+                  posterPath: show.poster_path,
+                  title: show.name,
                 };
                 const newItem = await addListItem({
                   listId: list.id,
-                  content: movieContent,
-                  type: "movie",
+                  content: showContent,
+                  type: "tv_show",
                   createdByUserId: session.user.id,
                 });
                 if (!newItem) throw new Error("no new item");
@@ -85,19 +85,19 @@ export function AddMovieDialog({
               <div className="flex flex-col items-center justify-start p-4">
                 <div className="flex w-full flex-row items-center justify-between gap-2">
                   <p className="text-left text-base font-bold text-primary">
-                    {movie.title}
+                    {show.name}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {movie.release_date}
+                    {show.first_air_date}
                   </p>
                 </div>
                 <p className="text-left text-sm text-muted-foreground">
-                  {movie.overview.substring(0, 100)}...
+                  {show.overview.substring(0, 100)}...
                 </p>
               </div>
               <img
                 className="w-24"
-                src={`https://image.tmdb.org/t/p/original/${movie.poster_path}`}
+                src={`https://image.tmdb.org/t/p/original/${show.poster_path}`}
               />
             </div>
           );

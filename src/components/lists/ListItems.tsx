@@ -3,6 +3,7 @@ import type {
   MovieItem,
   ThingContent,
   ThingItem,
+  TvShowItem,
 } from "@/server/db/schema";
 import { Card } from "../ui/card";
 import { Draggable } from "@hello-pangea/dnd";
@@ -142,7 +143,7 @@ function ListItemContent({
       return <ListItemBook isDragging={isDragging} item={item as ThingItem} />;
     case "tv_show":
       return (
-        <ListItemTVShow isDragging={isDragging} item={item as ThingItem} />
+        <ListItemTVShow isDragging={isDragging} item={item as TvShowItem} />
       );
     default:
       console.log(item.content);
@@ -208,8 +209,22 @@ function ListItemTVShow({
   item,
   isDragging,
 }: {
-  item: ThingItem;
+  item: TvShowItem;
   isDragging: boolean;
 }) {
-  return <p>{item.content.text}</p>;
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <img
+            className="w-32"
+            src={`https://image.tmdb.org/t/p/original/${item.content.posterPath}`}
+          />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{item.content.title}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 }

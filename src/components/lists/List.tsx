@@ -5,10 +5,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import type {
-  List,
-  ListTypes,
-} from "@/server/db/schema";
+import type { List, ListTypes } from "@/server/db/schema";
 import { useContext, useEffect, useRef, useState } from "react";
 import { ListItem } from "./ListItems";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -43,9 +40,8 @@ import {
 } from "../ui/select";
 import { CirclePicker } from "react-color";
 import { updateList } from "@/server/actions/lists/updateList";
-import { AddMovieItem } from "./addItemButtons/AddMovie";
-import { AddThingItem } from "./addItemButtons/AddThing";
 import { Button } from "../ui/button";
+import { AddItem } from "./addItemButtons/AddItem";
 
 export function List({ list, index }: { list: List; index: number }) {
   const [parent, enableAnimations] = useAutoAnimate();
@@ -83,9 +79,12 @@ export function List({ list, index }: { list: List; index: number }) {
         <DrawerDialogTrigger asChild>
           <CardHeader
             style={{
-              backgroundColor: list.accentColor != "#ffffff" ? list.accentColor : "transparent",
+              backgroundColor:
+                list.accentColor != "#ffffff"
+                  ? list.accentColor
+                  : "transparent",
             }}
-            className="flex flex-row items-center justify-between hover:cursor-pointer rounded-t-lg border-b-2  border-accent"
+            className="flex flex-row items-center justify-between rounded-t-lg border-b-2 border-accent  hover:cursor-pointer"
           >
             <h2 className="text-xl font-bold text-primary">{list.name}</h2>
           </CardHeader>
@@ -123,12 +122,7 @@ export function List({ list, index }: { list: List; index: number }) {
               ))}
             </SortableContext>
           </div>
-          {list.type === "thing" && (
-            <AddThingItem list={list} items={items} setItems={setItems} />
-          )}
-          {list.type === "movie" && (
-            <AddMovieItem list={list} items={items} setItems={setItems} />
-          )}
+          <AddItem list={list} items={items} setItems={setItems} />
         </CardContent>
       </div>
       <CardFooter className="flex flex-col rounded-b-lg"></CardFooter>
@@ -136,25 +130,19 @@ export function List({ list, index }: { list: List; index: number }) {
   );
 }
 
-
-
-
 function EditList({ list }: { list: List }) {
   const [listName, setListName] = useState(list.name ?? "");
-  const [listType, setListType] = useState(list.type);
   const [accentColor, setAccentColor] = useState(list.accentColor);
   const debouncedListName = useDebounce(listName, 500);
-  const debouncedListType = useDebounce(listType, 500);
   const debouncedAccentColor = useDebounce(accentColor, 500);
 
   useEffect(() => {
     void updateList({
       listId: list.id,
       name: debouncedListName,
-      type: debouncedListType,
       accentColor: debouncedAccentColor,
     });
-  }, [debouncedListName, debouncedListType, debouncedAccentColor]);
+  }, [debouncedListName, debouncedAccentColor]);
 
   return (
     <DrawerDialogContent>
@@ -181,28 +169,14 @@ function EditList({ list }: { list: List }) {
             setAccentColor(color.hex);
           }}
         />
-        <Button className="mt-4" onClick={() => {setAccentColor("#ffffff")}}>Reset Color to None</Button>
-      </div>
-      <div className="flex flex-col gap-4">
-        <Label>Item Type</Label>
-        <Select
-          defaultValue={list.type}
-          value={listType}
-          onValueChange={(value) => {
-            setListType(value as ListTypes);
+        <Button
+          className="mt-4"
+          onClick={() => {
+            setAccentColor("#ffffff");
           }}
         >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="thing">Thing</SelectItem>
-            <SelectItem value="movie">Movie</SelectItem>
-            <SelectItem value="tv">TV Show</SelectItem>
-            <SelectItem value="book">Book</SelectItem>
-            <SelectItem value="game">Game</SelectItem>
-          </SelectContent>
-        </Select>
+          Reset Color to None
+        </Button>
       </div>
       <DrawerDialogFooter>
         <DeleteListButton list={list} />

@@ -136,7 +136,6 @@ export const lists = createTable("lists", {
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   updatedAt: timestamp("updatedAt", { withTimezone: true }),
-  type: listTypes("type").notNull().default("thing"),
   accentColor: varchar("accent_color", { length: 255 }).notNull().default("#ffffff"),
 });
 
@@ -184,6 +183,11 @@ export type MovieContent = {
   posterPath: string;
 };
 
+export type TvShowContent = {
+  title: string;
+  posterPath: string;
+};
+
 export type ContentTypes = ThingContent | MovieContent;
 
 export type MovieItem = Item & {
@@ -194,4 +198,9 @@ export type MovieItem = Item & {
 export type ThingItem = Item & {
   content: ThingContent;
   type: "thing";
+}
+
+export type TvShowItem = Item & {
+  content: TvShowContent;
+  type: "tv_show";
 }
