@@ -37,6 +37,7 @@ export function Lists({ listBoard }: { listBoard: ListBoard }) {
   const onDragEnd = async (result: DragEndEvent) => {
     const { active, over } = result;
     setDraggedItem(null);
+    setDraggedList(null);
     if (!over) return;
     if (active.id == over.id) return;
     const activeData = active.data.current as {
